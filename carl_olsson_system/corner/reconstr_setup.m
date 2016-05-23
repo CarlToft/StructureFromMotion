@@ -1,0 +1,58 @@
+function settings = reconstr_setup
+
+%Load calibration matrix (same calibration for all cameras at present)
+load Calib_Results.mat KK;
+settings.KK = KK;
+
+%Select the images
+settings.img_path = 'C:\Users\fredrik\Documents\MATLAB\carl_olsson_system\corner\'; %C:\Users\Calle\Desktop\dataset\dkyrkan3\corner\';
+settings.imnames = dir(strcat(settings.img_path,'*.JPG'));
+
+%path to where to save results
+settings.save_path = '.\corner\';
+
+%Path to Lowes SIFT-implementation
+settings.SIFT_path = 'C:\Users\fredrik\Documents\MATLAB\siftdemov4\';
+
+%Setup VLfeat.
+fold = pwd;
+cd C:\Users\fredrik\Documents\MATLAB\vlfeat-0.9.13\toolbox\
+vl_setup
+cd(fold);
+
+%Rescales the images to speed up SIFT.
+settings.scale = 0.5;
+
+%RANSAC_threshold
+settings.RANSAC_pixtol = 2.5; %Tolerans vid RANSAC-körning
+
+%Minimum number matches to compute two-view geometris
+settings.mininlnr = 20;
+
+%Minimum number of inliers to trust two-view results
+settings.mincorrnr = 20;
+
+%Threshold for inlier (in rotation averaging)
+settings.roterrtol = 0.1; 
+
+%Tolerans for first known-rotation run
+settings.pixtol1 = 5; 
+
+%Tolerans for second known-rotation run (don't know why I have two of
+%these)
+settings.pixtol2 = 5; 
+
+%Points should be seen in at least this many cameras to be included in the
+%optimization (to save memory).
+settings.visviews = 3;
+
+%Points in the final reconstruction that are uncertain in depth are removed
+%after the reconstruction.
+settings.uncertin_tol = settings.pixtol1; %Problems with the scale ambiguity?
+
+%camera graph can be used to single out images to be matched if the
+%sequence is not unordered.
+settings.camera_graph = [];
+
+%Has something to do with the point tracking. Sould probably alwasys be 1.
+settings.merge_tracks = 1;
