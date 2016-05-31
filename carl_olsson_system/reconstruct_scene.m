@@ -1,5 +1,5 @@
 %Read settings
-cd corner\
+cd corner/
 settings = reconstr_setup;
 cd ..
 
