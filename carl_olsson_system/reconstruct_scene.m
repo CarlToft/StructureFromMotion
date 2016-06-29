@@ -1,6 +1,6 @@
 %Read settings
 cd corner/
-settings = reconstr_setup;
+settings = reconstr_setup_corner;
 cd ..
 
 %Perform pairwise matching for all pairs, (unless camera_graph is

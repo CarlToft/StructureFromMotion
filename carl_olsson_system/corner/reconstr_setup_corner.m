@@ -1,4 +1,4 @@
-function settings = reconstr_setup
+function settings = reconstr_setup_corner
 
 %Load calibration matrix (same calibration for all cameras at present)
 load Calib_Results.mat KK
@@ -40,7 +40,7 @@ settings.RANSAC_pixtol = 2.5; %Tolerans vid RANSAC-k�rning
 %Minimum number matches to compute two-view geometris
 settings.mininlnr = 20;
 
-settings.storesift = 0; %save sift correspondences?
+settings.storesift = 1; %save sift correspondences?
 
 %Minimum number of inliers to trust two-view results
 settings.mincorrnr = 20;
