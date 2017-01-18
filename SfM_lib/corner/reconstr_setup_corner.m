@@ -1,46 +1,44 @@
-function settings = reconstr_setup_corner
+function settings = reconstr_setup
 
 %Load calibration matrix (same calibration for all cameras at present)
-load Calib_Results.mat KK
+load Calib_Results.mat KK;
 settings.KK = KK;
-settings.kc = zeros(5,1);
 
-%Select the images /home/toft/Documents/carltoft/tunnels/experiment3_data
-settings.img_path = '/home/toft/Documents/carltoft/carl_olsson_system/corner/'; 
+settings.kc = zeros(5,1); %radiell distortion
+settings.rotationvariantSIFT = 0;
+settings.distRatio = 0.5; %Lowe's sift criterion
+settings.expectedF = [];
+settings.PeakThresh = 0;
+settings.EdgeThresh = 10;
+settings.forbidden = [];
+settings.storesift = 0; %save sift correspondences?
+
+
+
+%Select the images
+settings.img_path = 'C:\Users\fredrik\Documents\MATLAB\carl_olsson_system\corner\'; %C:\Users\Calle\Desktop\dataset\dkyrkan3\corner\';
 settings.imnames = dir(strcat(settings.img_path,'*.JPG'));
 
-settings.expectedF = [];
-
-settings.rotationvariantSIFT = 1;
-settings.PeakThresh = 1;
-settings.EdgeThresh = 10;
-                       
-                       
 %path to where to save results
-settings.save_path = './corner/';
+settings.save_path = '.\corner\';
 
 %Path to Lowes SIFT-implementation
-settings.SIFT_path = '/home/toft/Documents/carltoft/siftdemov4/';
+settings.SIFT_path = 'C:\Users\fredrik\Documents\MATLAB\siftdemov4\';
 
 %Setup VLfeat.
 fold = pwd;
-cd /home/toft/Documents/carltoft/vlfeat-0.9.13/toolbox/
+cd C:\Users\fredrik\Documents\MATLAB\vlfeat-0.9.13\toolbox\
 vl_setup
 cd(fold);
 
 %Rescales the images to speed up SIFT.
 settings.scale = 0.5;
 
-% Same criterion as Lowe = 0.5 
-settings.distRatio = 0.5; 
-
 %RANSAC_threshold
-settings.RANSAC_pixtol = 2.5; %Tolerans vid RANSAC-kï¿½rning
+settings.RANSAC_pixtol = 2.5; %Tolerans vid RANSAC-körning
 
 %Minimum number matches to compute two-view geometris
 settings.mininlnr = 20;
-
-settings.storesift = 1; %save sift correspondences?
 
 %Minimum number of inliers to trust two-view results
 settings.mincorrnr = 20;
@@ -69,6 +67,3 @@ settings.camera_graph = [];
 
 %Has something to do with the point tracking. Sould probably alwasys be 1.
 settings.merge_tracks = 1;
-
-settings.forbidden={};
-settings.epipoledistance = 150; %remove points around expected epipole
