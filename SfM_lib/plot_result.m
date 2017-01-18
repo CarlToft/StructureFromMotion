@@ -14,7 +14,12 @@ plot3(U(1,:),U(2,:),U(3,:),'.')
 axis equal;
 for i=imindex;
     figure(2+mod(i-1,20));
-    im = imread(strcat(img_path,imnames(i).name));
+    filename = strcat(img_path,imnames(i).name);
+    if isfield(imnames(i),'ts'),
+        im = LoadImage(filename, imnames(i).ts, settings.LUT);
+    else
+        im = imread(filename);
+    end
     imagesc(im);
     hold on;
     tmp = u.points{i}; 
