@@ -1,25 +1,36 @@
-function pairwise_matching(settings)
+function pairwise_matching(settings, seq)
 imnames = settings.imnames;
 img_path = settings.img_path;
 scale = settings.scale;
 SIFT_path = settings.SIFT_path;
-camera_graph = settings.camera_graph;
 save_path = settings.save_path;
 KK = settings.KK;
 kc = settings.kc;
 distRatio = settings.distRatio; %Same rejection criterion as Lowe = 0.5
 
+if nargin<2,
+    seq = 1:length(imnames);
+end
+imnames = imnames(seq);
+camera_graph = settings.camera_graph(seq,seq);
 
-if ~isempty(settings.expectedF),
-    tmp = pflat(null(settings.expectedF));
-    epipole = KK*pextend(apply_distortion(tmp(1:2,:),kc));
+if ~isempty(settings.expectedEpipole),
+    epipole = KK*pextend(apply_distortion(settings.expectedEpipole,kc));
 end
 
 %Compute SIFT for all the images
-SIFT = cell(1,length(imnames));
-for i=1:length(imnames);
-    tmp = [i length(imnames)];
-    im = imresize(imread(strcat(img_path,imnames(i).name)),scale);
+SIFT = cell(1,length(seq));
+
+for i=1:length(seq);
+    tmp = [i length(seq)];
+    
+    filename = strcat(img_path,imnames(i).name);
+    if isfield(imnames(i),'ts'),
+        im = LoadImage(filename, imnames(i).ts, settings.LUT);
+    else
+        im = imread(filename);
+    end
+    im = imresize(im,scale);
     
     if 0,
         [~,descriptors1,locs1] = mod_sift(im(1:1000,:,:),settings);
@@ -53,7 +64,7 @@ for i=1:length(imnames);
         badindex = union(badindex,find(SIFT{i}.locs(:,2) >= tmp(1,1) & SIFT{i}.locs(:,2) <= tmp(1,2) & ...
                                         SIFT{i}.locs(:,1) >= tmp(2,1) & SIFT{i}.locs(:,1) <= tmp(2,2)));
     end
-    if ~isempty(settings.expectedF),
+    if ~isempty(settings.expectedEpipole),
         badindex = union(badindex,find((SIFT{i}.locs(:,2)-epipole(1)).^2+(SIFT{i}.locs(:,1)-epipole(2)).^2<=settings.epipoledistance^2));
     end
     
@@ -76,15 +87,21 @@ alpha_c = KK(1,2)/fc(1);
 kc = settings.kc;
 
 %Match all pairs.
-pairwiseEst = cell(length(imnames),length(imnames));
-for i = 1:length(imnames);
+pairwiseEst = cell(length(seq),length(seq));
+for i = 1:length(seq);
     %Build kdtree
     tmp1 = normr(double(SIFT{i}.desc))';
-    kdtree = vl_kdtreebuild(tmp1,'NumTrees', 12);
-    for j = i+1:length(imnames);       
+    if size(tmp1,2)==0,
+        for j = i+1:length(seq);
+            pairwiseEst{i,j}.ind1 = [];
+            pairwiseEst{i,j}.ind2 = [];
+        end
+    else
+     kdtree = vl_kdtreebuild(tmp1,'NumTrees', 12);
+     for j = i+1:length(seq);
         if ~(isempty(camera_graph)); %If there is a camera graph only use those pairs.
             if camera_graph(i,j) == 1
-                [i j length(imnames)]
+                [i j length(seq)]
                 
                 tmp2 = normr(double(SIFT{j}.desc))';
                 [index,dist] = vl_kdtreequery(kdtree,tmp1,tmp2,'MAXCOMPARISONS',50,'NUMNEIGHBORS',2);
@@ -96,16 +113,17 @@ for i = 1:length(imnames);
                 matches = zeros(1,size(SIFT{j}.desc,1));
                 
                 tmp = acos(maxvals) < distRatio*acos(secondmaxvals);
-                if ~isempty(settings.expectedF);
-                    F = settings.expectedF;
-                    p1 = pextend(normalize(SIFT{i}.locs(index(1,:),[2,1])',fc,cc,kc,alpha_c));
-                    p2 = pextend(normalize(SIFT{j}.locs(:,[2,1])',fc,cc,kc,alpha_c));
-                    l1 = p1'*F;l1norm=sqrt(l1(:,1).^2+l1(:,2).^2);d1 = abs(diag(l1 * p2)./l1norm);
-                    l2 = p2'*F';l2norm=sqrt(l2(:,1).^2+l2(:,2).^2);d2 = abs(diag(l2 * p1)./l2norm);
-                    dist=d1+d2;
-                    tmp = tmp & (dist < 5*settings.RANSAC_pixtol/KK(1,1)); %5 times ransac threshold
+                
+%                if ~isempty(settings.expectedF);
+%                    F = settings.expectedF;
+%                    p1 = pextend(normalize(SIFT{i}.locs(index(1,:),[2,1])',fc,cc,kc,alpha_c));
+%                    p2 = pextend(normalize(SIFT{j}.locs(:,[2,1])',fc,cc,kc,alpha_c));
+%                    l1 = p1'*F;l1norm=sqrt(l1(:,1).^2+l1(:,2).^2);d1 = abs(diag(l1 * p2)./l1norm);
+%                    l2 = p2'*F';l2norm=sqrt(l2(:,1).^2+l2(:,2).^2);d2 = abs(diag(l2 * p1)./l2norm);
+%                    dist=d1+d2;
+%                    tmp = tmp & (dist < 5*settings.RANSAC_pixtol/KK(1,1)); %5 times ransac threshold
 %                    tmp = tmp & sqrt(sum((SIFT{i}.locs(index(1,:),[1,2])-SIFT{j}.locs(:,[1,2]))'.^2))'<settings.distance;
-                end
+%                end
                 
                 matches(tmp) = index(1,tmp);
                 fprintf('Found %d mathches\n',sum(matches ~= 0));
@@ -125,7 +143,7 @@ for i = 1:length(imnames);
                 pairwiseEst{i,j}.ind2 = [];
             end
         else %No camera graph. Match all pairs.
-            [i j length(imnames)]
+            [i j length(seq)]
             
             
             tmp2 = normr(double(SIFT{j}.desc))';
@@ -138,16 +156,16 @@ for i = 1:length(imnames);
             matches = zeros(1,size(SIFT{j}.desc,1));
                 
             tmp = acos(maxvals) < distRatio*acos(secondmaxvals);
-            if ~isempty(settings.expectedF);
-                    F = settings.expectedF;
-                    p1 = pextend(normalize(SIFT{i}.locs(index(1,:),[2,1])',fc,cc,kc,alpha_c));
-                    p2 = pextend(normalize(SIFT{j}.locs(:,[2,1])',fc,cc,kc,alpha_c));
-                    l1 = p1'*F;l1norm=sqrt(l1(:,1).^2+l1(:,2).^2);d1 = abs(diag(l1 * p2)./l1norm);
-                    l2 = p2'*F';l2norm=sqrt(l2(:,1).^2+l2(:,2).^2);d2 = abs(diag(l2 * p1)./l2norm);
-                    dist=d1+d2;
-                    tmp = tmp & (dist < 5*settings.RANSAC_pixtol/KK(1,1)); %5 times ransac threshold
+%            if ~isempty(settings.expectedF);
+%                    F = settings.expectedF;
+%                    p1 = pextend(normalize(SIFT{i}.locs(index(1,:),[2,1])',fc,cc,kc,alpha_c));
+%                    p2 = pextend(normalize(SIFT{j}.locs(:,[2,1])',fc,cc,kc,alpha_c));
+%                    l1 = p1'*F;l1norm=sqrt(l1(:,1).^2+l1(:,2).^2);d1 = abs(diag(l1 * p2)./l1norm);
+%                    l2 = p2'*F';l2norm=sqrt(l2(:,1).^2+l2(:,2).^2);d2 = abs(diag(l2 * p1)./l2norm);
+%                    dist=d1+d2;
+%                    tmp = tmp & (dist < 5*settings.RANSAC_pixtol/KK(1,1)); %5 times ransac threshold
 %                    tmp = tmp & sqrt(sum((SIFT{i}.locs(index(1,:),[1,2])-SIFT{j}.locs(:,[1,2]))'.^2))'<settings.distance;
-            end
+%            end
                
             matches(tmp) = index(1,tmp);
             fprintf('Found %d mathches\n',sum(matches ~= 0));
@@ -175,6 +193,7 @@ for i = 1:length(imnames);
             pairwiseEst{i,j}.ind1 = ind1;
             pairwiseEst{i,j}.ind2 = ind2;
         end
+     end
     end
 end
 %Matching done.
