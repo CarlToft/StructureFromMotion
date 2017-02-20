@@ -31,6 +31,7 @@ for i = 1:length(u.points)
 end
 u.pointnr = sum(vis);
 
+%[U,P,s] = krot4_feas_LP_sparse(u,A,pixtol2./KK(1,1),0.01,100);
 [U,P,s] = krot4_feas_LP_sparse(u,A,pixtol2./KK(1,1),0.01,1);
 s0 = s;
 outlnr = sum(s > 1e-5)

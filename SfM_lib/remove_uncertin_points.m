@@ -1,8 +1,10 @@
-function [U,P,u] = remove_uncertin_points(settings); 
+function [U,P,u] = remove_uncertin_points(settings,U,P,u); 
 save_path = settings.save_path;
 uncertin_tol = settings.uncertin_tol;
 
-load(strcat(save_path,'str_mot2.mat'));
+if nargin<2,
+    load(strcat(save_path,'str_mot2.mat'));
+end
 d2f = zeros(size(U,2),9);
 
 KK = settings.KK;
@@ -147,5 +149,6 @@ for i = 1:length(u.points);
     u.points{i} = uu(:,u.index{i});
 end    
 u.pointnr = sum(~rmpoints);
-
-save(strcat(save_path,'red_str_mot.mat'),'u','U','P');
+if nargin<2,
+    save(strcat(save_path,'red_str_mot.mat'),'u','U','P');
+end
