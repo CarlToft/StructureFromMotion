@@ -1,14 +1,35 @@
-function [U,P,lambda] = modbundle_sparse(U,P,u,iter,lambda)
+function [U,P,lambda] = modbundle_sparse(U,P,u,iter,lambda,goodindex,ddfactor)
 % optimering av \sum_j ||f_ij(P_i,U_j)-u_j||_2^2 
 % genom linearisering av f_ij(P_i,U_j)
 % iter - antal iterationer
 % lambda - dämpfaktor
+
+if nargin<6,
+    goodindex=[];
+end
+if nargin<7,
+    ddfactor = 10;
+end
 schur = 1;
+
+nbr=u.pointnr;
+u.pointnr = u.pointnr + ddfactor*length(goodindex);
+for jj=1:length(goodindex);
+    U(:,end+[1:ddfactor])=U(:,goodindex(jj))*ones(1,ddfactor);
+end
 
 for i = 1:length(u.points);
     [KKK,R] = rq(P{i}(:,1:3));
     KK{i} = KKK;
     u.points{i} = pflat(inv(KKK)*u.points{i});
+    [aa,bb]=intersect(u.index{i},goodindex);
+    if length(bb)>0,
+        for jj=1:length(bb);
+            ind = find(goodindex==aa(jj));
+            u.index{i}(end+[1:ddfactor])=nbr+ddfactor*(ind-1)+[1:ddfactor];
+            u.points{i}(:,end+[1:ddfactor])=u.points{i}(:,bb(jj))*ones(1,ddfactor);
+        end
+    end
     P{i} = inv(KKK)*P{i};
 end
 
@@ -88,6 +109,7 @@ fprintf('\n');
 for i = 1:length(P);
     P{i} = KK{i}*P{i};
 end
+U=U(:,1:nbr);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function res = compute_res(P,U,u)
