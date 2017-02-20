@@ -134,7 +134,8 @@ for i = 1:length(P);
 end
 U = U(:,~rmpoints);
 
-for i = 1:size(u.points,2);
+%for i = 1:size(u.points,2);
+for i = 1:length(u.points);
     uu = NaN*ones(3,u.pointnr);
     uu(:,u.index{i}) = u.points{i};
     uu = uu(:,~rmpoints);
