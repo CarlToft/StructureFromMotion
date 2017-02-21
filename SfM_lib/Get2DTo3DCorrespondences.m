@@ -18,7 +18,7 @@ function [points2d, points3d] = Get2DTo3DCorrespondences(pic, U, u, settings)
     end
     
     % Extract SIFT features from input picture
-    pic = single(rgb2gray(pic));
+    pic = imresize(single(rgb2gray(pic)),settings.scale);
     [f,d] = vl_sift(pic, 'PeakThresh', settings.PeakThresh, 'EdgeThresh', settings.EdgeThresh);
     locs = f([1,2],:)/settings.scale;
     

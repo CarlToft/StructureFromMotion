@@ -7,5 +7,5 @@
 function P = CameraResecFromPicture(im, U, u, settings)
     [points2d, points3d] = Get2DTo3DCorrespondences(im, U, u, settings);
     points2d = [points2d; ones(1,size(points2d,2))]; points2d = normc(points2d); % convert image coords into unit vectors
-    P = CameraPoseRANSAC_Mex(points3d, points2d); 
+    [P,inl] = CameraPoseRANSAC_Mex(points3d, points2d, 0.002)
 end
