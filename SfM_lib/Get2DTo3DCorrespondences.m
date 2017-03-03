@@ -20,12 +20,20 @@ function [points2d, points3d] = Get2DTo3DCorrespondences(pic, U, u, settings)
     % Extract SIFT features from input picture
     pic = imresize(single(rgb2gray(pic)),settings.scale);
     [f,d] = vl_sift(pic, 'PeakThresh', settings.PeakThresh, 'EdgeThresh', settings.EdgeThresh);
+    if (settings.rotationvariantSIFT==1)
+        [f,d] = vl_sift(pic,'frames',[f(1:3,:);zeros(1,size(f,2))]);
+    end
     locs = f([1,2],:)/settings.scale;
     
     % Match SIFT features in picture to those in 3D model
-    [ind1, ind2] = matchsiftvectors(SIFT_vectors, d, settings.distRatio);
-    points2d = pflat(settings.KK\pextend(locs(:,ind2)));
-    points2d = points2d(1:2,:);
+    [ind2, ind1] = matchsiftvectors(d, SIFT_vectors, settings.distRatio);
+    
+    % Return coordinates for matched image points in normalized coordinates
+    fc = settings.KK([1 5]);
+    cc = settings.KK(1:2,3);
+    alpha_c = settings.KK(1,2)/fc(1);
+    kc = settings.kc; 
+    points2d = pextend(normalize(locs(:,ind2),fc,cc,kc,alpha_c));
     
     points3d = U(1:3,ind1);
 end
