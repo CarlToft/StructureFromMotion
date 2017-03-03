@@ -1,6 +1,7 @@
 % Matches two sets of SIFT vectors. Takes as argument two matrices with 128
 % rows (SIFT features as columns), and returns two row vectors ind1 and
-% ind2, where all pairs (ind1{i}, ind2{i}) correspond to matched vectors. 
+% ind2, where all pairs (ind1{i}, ind2{i}) correspond to matched vectors.
+% Each column in SIFT1 is matched to the closest column in SIFT2. 
 function [ind1, ind2] = matchsiftvectors(SIFT1, SIFT2, loweRatio)
     tmp1 = normc(double(SIFT1));
     tmp2 = normc(double(SIFT2));
