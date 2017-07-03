@@ -30,6 +30,9 @@ for i=1:length(seq);
     else
         im = imread(filename);
     end
+    if size(im,3)==3,
+        im = rgb2gray(im);
+    end
     im = imresize(im,scale);
     
     if 0,
@@ -46,14 +49,18 @@ for i=1:length(seq);
         SIFT{i}.desc = [descriptors1;descriptors2];
         SIFT{i}.locs = [locs1;locs2];
     else
-        [locs1,descriptors1] = vl_sift(single(rgb2gray(im)),'PeakThresh',settings.PeakThresh,'EdgeThresh',settings.EdgeThresh);
-        
-        if settings.rotationvariantSIFT==1,
-            %force orientations fixed
-            [locs1,descriptors1] = vl_sift(single(rgb2gray(im)),'frames',[locs1(1:3,:);zeros(1,size(locs1,2))]);
+        if isfield(settings,'LIFT'),
+            keyboard;
+        else
+            [locs1,descriptors1] = vl_sift(single(im),'PeakThresh',settings.PeakThresh,'EdgeThresh',settings.EdgeThresh);
+    
+            if settings.rotationvariantSIFT==1,
+                %force orientations fixed
+                [locs1,descriptors1] = vl_sift(single(im),'frames',[locs1(1:3,:);zeros(1,size(locs1,2))]);
+            end
+            SIFT{i}.desc = descriptors1';
+            SIFT{i}.locs = locs1([2,1],:)';
         end
-        SIFT{i}.desc = descriptors1';
-        SIFT{i}.locs = locs1([2,1],:)';
     end
     
     SIFT{i}.locs(:,1:2) = SIFT{i}.locs(:,1:2)/scale;

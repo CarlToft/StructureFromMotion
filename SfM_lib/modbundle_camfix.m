@@ -1,35 +1,19 @@
-function [U,P,lambda] = modbundle_sparse(U,P,u,iter,lambda,goodindex,ddfactor)
+function [U,P,lambda] = modbundle_camfix(U,P,u,iter,lambda,camindex)
 % optimering av \sum_j ||f_ij(P_i,U_j)-u_j||_2^2 
 % genom linearisering av f_ij(P_i,U_j)
 % iter - antal iterationer
 % lambda - dämpfaktor
+% camindex - index för kameror som ska vara fixa (OBS! Undvik length(camindex)==1)
 
 if nargin<6,
-    goodindex=[];
-end
-if nargin<7,
-    ddfactor = 10;
+    camindex=[];
 end
 schur = 1;
-
-nbr=u.pointnr;
-u.pointnr = u.pointnr + ddfactor*length(goodindex);
-for jj=1:length(goodindex);
-    U(:,end+[1:ddfactor])=U(:,goodindex(jj))*ones(1,ddfactor);
-end
 
 for i = 1:length(u.points);
     [KKK,R] = rq(P{i}(:,1:3));
     KK{i} = KKK;
     u.points{i} = pflat(inv(KKK)*u.points{i});
-    [aa,bb]=intersect(u.index{i},goodindex);
-    if length(bb)>0,
-        for jj=1:length(bb);
-            ind = find(goodindex==aa(jj));
-            u.index{i}(end+[1:ddfactor])=nbr+ddfactor*(ind-1)+[1:ddfactor];
-            u.points{i}(:,end+[1:ddfactor])=u.points{i}(:,bb(jj))*ones(1,ddfactor);
-        end
-    end
     P{i} = inv(KKK)*P{i};
 end
 
@@ -37,7 +21,7 @@ fprintf('Iter:\t Error:\t lambda:\n');
 res = compute_res(P,U,u);                 
 fprintf('%d\t%f\t%f',0,res,lambda);
 for i = 1:iter
-    [A,B] = setup_lin_system(P,U,u);  
+    [A,B] = setup_lin_system(P,U,u, camindex);  
     res = compute_res(P,U,u);
     if ~schur
         C = (A'*A+lambda*speye(size(A,2),size(A,2)));
@@ -46,10 +30,15 @@ for i = 1:iter
         d = -C\c;
     else
         %%%% Eliminera punkter %%%%%%%%%%
-        AU = A(:,1:3*u.pointnr-1);
-        AP = A(:,3*u.pointnr:end);
+        if length(camindex)==0,
+            AU = A(:,1:3*u.pointnr-1);
+            AP = A(:,3*u.pointnr:end);
+        else
+            AU = A(:,1:3*u.pointnr);
+            AP = A(:,(3*u.pointnr+1):end);
+        end
         UU = AU'*AU + lambda*speye(size(AU,2));
-        invUU = invertUU(UU);
+        invUU = invertUU(UU, camindex);
         slask = AU'*AP;
         slask = invUU*slask;
         slask2 = AP'*AU;
@@ -65,7 +54,7 @@ for i = 1:iter
         d = [dU; dR];
     end    
     fprintf('\tDone.\n');
-    [Pnew,Unew] = update_var(d,P,U);
+    [Pnew,Unew] = update_var(d,P,U,camindex);
     resnew = compute_res(Pnew,Unew,u);
     while resnew > res
         lambda = lambda*2;
@@ -79,7 +68,7 @@ for i = 1:iter
             AU = A(:,1:3*u.pointnr-1);
             AP = A(:,3*u.pointnr:end);
             UU = AU'*AU + lambda*speye(size(AU,2));
-            invUU = invertUU(UU);
+            invUU = invertUU(UU,camindex);
             slask = AU'*AP;
             slask = invUU*slask;
             slask2 = AP'*AU;
@@ -94,7 +83,7 @@ for i = 1:iter
             dU = -invUU*(AU'*(AP*dR+B));
             d = [dU; dR];
         end
-        [Pnew,Unew] = update_var(d,P,U);
+        [Pnew,Unew] = update_var(d,P,U,camindex);
         resnew = compute_res(Pnew,Unew,u);
     end
     if lambda > 0.001
@@ -109,7 +98,6 @@ fprintf('\n');
 for i = 1:length(P);
     P{i} = KK{i}*P{i};
 end
-U=U(:,1:nbr);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function res = compute_res(P,U,u)
@@ -124,14 +112,28 @@ for i = 1:length(P);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [Pnew,Unew] = update_var(d,P,U)
+function [Pnew,Unew] = update_var(d,P,U,camindex)
 Ba = [0 1 0; -1 0 0; 0 0 0];
 Bb = [0 0 1; 0 0 0; -1 0 0];
 Bc = [0 0 0; 0 0 1; 0 -1 0];
 
-dpointvar = [0; d(1:(3*size(U,2)-1))];
+if length(camindex)==0,
+    dpointvar = [0; d(1:(3*size(U,2)-1))];
+else
+    dpointvar = [d(1:(3*size(U,2)))];
+end
+    
 dpointvar = reshape(dpointvar, size(U(1:3,:)));
-dcamvar = [0;0;0;0;0;0;d(3*size(U,2):end)];
+if length(camindex)==0,
+    dcamvar = [0;0;0;0;0;0;d(3*size(U,2):end)];
+else
+    dcamvar = zeros(length(P)*6,1);
+    index = setdiff(1:length(P),camindex);
+    keepcols = [(index-1)*6+1;(index-1)*6+2;(index-1)*6+3;(index-1)*6+4;(index-1)*6+5;(index-1)*6+6];
+    keepcols = keepcols(:)';
+    dcamvar(keepcols) = [d(3*size(U,2)+1:end)];
+end
+
 dcamvar = reshape(dcamvar,[6 length(P)]);
 
 Unew = pextend(U(1:3,:) + dpointvar);
@@ -146,7 +148,7 @@ for i=1:length(P);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [A,B] = setup_lin_system(P,U,u)
+function [A,B] = setup_lin_system(P,U,u,camindex)
 numpts = size(U,2);
 %Bas för tangentplanet till rotationsmångfalden.
 Ba = [0 1 0; -1 0 0; 0 0 0];
@@ -525,8 +527,15 @@ A = sparse(row,col,data);
 %lås koordinatsystemet
 %Första kameran konstant
 %och första koordinaten i första punkten konstant
-A = A(:,[1:3*numpts 3*numpts+7:end]);
-A = A(:,[2:end]);
+if length(camindex)==0,
+    A = A(:,[1:3*numpts 3*numpts+7:end]);
+    A = A(:,[2:end]);
+else
+    index = setdiff(1:length(P),camindex);
+    keepcols = [(index-1)*6+1;(index-1)*6+2;(index-1)*6+3;(index-1)*6+4;(index-1)*6+5;(index-1)*6+6];
+    keepcols = keepcols(:)';
+    A = A(:,[1:3*numpts (3*numpts+keepcols)]);
+end
 fprintf('Done\n');
 
 
@@ -686,11 +695,15 @@ end
 
 end
 
-function invUU = invertUU(UU)
+function invUU = invertUU(UU,camindex)
 % fixa så att alla block är 3 block
 [i,j,data] = find(UU);
-UU = sparse(i+1,j+1,data);
-UU(1,1) = 1;
+if length(camindex)==0,
+    UU = sparse(i+1,j+1,data);
+    UU(1,1) = 1;
+else
+    UU = sparse(i,j,data);
+end
 
 %plocka ut elementen
 [i,j,data] = find(UU);
@@ -722,7 +735,11 @@ for i = 3:-1:2
     end
 end
 [i,j,data] = find(invA);
-invUU = sparse(i(2:end)-1,j(2:end)+(ceil(i(2:end)/3)-1)*3-1,data(2:end));
+if length(camindex)==0,
+    invUU = sparse(i(2:end)-1,j(2:end)+(ceil(i(2:end)/3)-1)*3-1,data(2:end));
+else
+    invUU = sparse(i,j+(ceil(i/3)-1)*3,data);
+end
 
 function [r,q]=rq(a)
 % RQ [r,q]=rq(a) factorises a such a=rq where r upper tri. and q unit matrix
