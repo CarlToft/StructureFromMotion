@@ -12,6 +12,7 @@ settings.PeakThresh = 0;
 settings.EdgeThresh = 10;
 settings.forbidden = [];
 settings.storesift = 0; %save sift correspondences?
+settings.expectedEpipole = [];
 
 
 

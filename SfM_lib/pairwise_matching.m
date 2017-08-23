@@ -12,7 +12,11 @@ if nargin<2,
     seq = 1:length(imnames);
 end
 imnames = imnames(seq);
-camera_graph = settings.camera_graph(seq,seq);
+if ~isempty(settings.camera_graph)
+    camera_graph = settings.camera_graph(seq,seq);
+else
+    camera_graph = [];
+end
 
 if ~isempty(settings.expectedEpipole),
     epipole = KK*pextend(apply_distortion(settings.expectedEpipole,kc));
