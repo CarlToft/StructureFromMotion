@@ -24,5 +24,5 @@ The example is executed with `reconstruct_scene.m` and uses data from the folder
 2. Edit the library path in `setup.m` to match yours.
 3. Run `setup.m`
 4. `cd SfM_lib`
-5. Edit the VLFEAT, SIFT implementation paths in `corner/reconstr_setup_corner.m` to match yours.
+5. Edit the SIFT implementation path in `corner/reconstr_setup_corner.m` to match yours.
 6. Run `reconstruct_scene.m`
