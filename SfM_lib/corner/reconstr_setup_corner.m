@@ -23,9 +23,6 @@ settings.imnames = dir(fullfile(settings.img_path,'*.JPG'));
 %path to where to save results
 settings.save_path = '.\corner\';
 
-%Path to Lowes SIFT-implementation
-settings.SIFT_path = 'C:\Users\fredrik\Documents\MATLAB\siftdemov4\';
-
 %Rescales the images to speed up SIFT.
 settings.scale = 0.5;
 

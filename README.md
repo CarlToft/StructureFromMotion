@@ -12,7 +12,7 @@ Download standard bundle from http://cvxr.com/cvx/download/
 ### VLFEAT
 Install instructions: http://www.vlfeat.org/install-matlab.html
 
-### Lowe´s SIFT implementation
+### Lowe´s SIFT implementation (optional)
 Download and unpack http://www.cs.ubc.ca/~lowe/keypoints/siftDemoV4.zip.
 
 ### Calibration toolbox
@@ -20,9 +20,9 @@ Download and unpack http://www.vision.caltech.edu/bouguetj/calib_doc/.
 
 ## Running the example
 The example is executed with `reconstruct_scene.m` and uses data from the folder `corner`.
+Settings for the reconstruction are found in `corner/reconstr_setup_corner.m`.
 1. Go to repo root folder: `cd <your_path>/StructureFromMotion`
 2. Edit the library path in `setup.m` to match yours.
 3. Run `setup.m`
 4. `cd SfM_lib`
-5. Edit the SIFT implementation path in `corner/reconstr_setup_corner.m` to match yours.
-6. Run `reconstruct_scene.m`
+5. Run `reconstruct_scene.m`

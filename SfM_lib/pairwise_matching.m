@@ -2,7 +2,6 @@ function pairwise_matching(settings, seq)
 imnames = settings.imnames;
 img_path = settings.img_path;
 scale = settings.scale;
-SIFT_path = settings.SIFT_path;
 save_path = settings.save_path;
 KK = settings.KK;
 kc = settings.kc;
