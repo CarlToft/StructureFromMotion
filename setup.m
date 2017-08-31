@@ -1,8 +1,14 @@
 % Reset path to avoid namespace clashes
 restoredefaultpath;
 
-% Change to match your folder structure.
-lib_folder = fullfile('/','home','<user>','libs');
+lib_env = getenv('SFM_LIB_PATH');
+if isempty(lib_env)
+    % If you are NOT using the environment variable, 
+    % change this match your folder structure.
+    lib_folder = fullfile('/','home','davidg','libs');
+else
+    lib_folder = fullfile(lib_env);
+end
 
 % Include local visionary folder
 addpath(fullfile(pwd, 'visionary'));
@@ -23,8 +29,8 @@ vl_setup
 cd(fold);
 
 % CVX
-cd (fullfile(lib_folder,'cvx'));
-cvx_setup
-cd (fold);
+% cd (fullfile(lib_folder,'cvx'));
+% cvx_setup
+% cd (fold);
 
 clear;
