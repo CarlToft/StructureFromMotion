@@ -19,21 +19,25 @@ Download and unpack http://www.cs.ubc.ca/~lowe/keypoints/siftDemoV4.zip.
 ### Calibration toolbox
 Download and unpack http://www.vision.caltech.edu/bouguetj/calib_doc/.
 
-## Running the example
+## Initiate session
 The setup code assumes that the above libs have been placed in a common folder , 
 below refered to as the library path.
 
-The example is executed with `reconstruct_scene.m` and uses data from the folder `corner`.
-Settings for the reconstruction are found in `corner/reconstr_setup_corner.m`.
-
-For Unix/Linux:
+**For Unix/Linux:**
 1. Start matlab with `./start_matlab.sh <your library path>`.
+2. Run `setup.m`
 
-Otherwise:
-1. Go to repo root folder: `cd <your_path>/StructureFromMotion`
-2. Edit the library path in `setup.m` to match yours.
+**Otherwise:**
+1. Run `setup.m <your library path>`
 
-Last steps are the same for all:
-1. Run `setup.m`
-2. `cd SfM_lib`
-3. Run `reconstruct_scene.m`
+## Running the example
+The example is executed with `reconstruct_corner.m` and uses data from the folder `corner`.
+Settings for the reconstruction are found in `corner/reconstr_setup.m`.
+1. `cd SfM_lib`
+2. Run `reconstruct_scene.m`
+
+## Running on your images
+1. Put your images in a folder together with your settings file named `reconstr_setup.m`.
+Copy the corner example settings file to use as a template.
+2. Make sure the settings file points correctly to your calibration data.
+3. Run `reconstruct_scene <path to data>`
