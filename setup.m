@@ -1,9 +1,14 @@
+function setup(lib_env);
+
 % Reset path to avoid namespace clashes
 restoredefaultpath;
 
-lib_env = getenv('SFM_LIB_PATH');
+if nargin<1,
+    lib_env = getenv('SFM_LIB_PATH');
+end
+
 if isempty(lib_env)
-    % If you are NOT using the environment variable, 
+    % If you are NOT using the environment variable,
     % change this match your folder structure.
     lib_folder = fullfile('/','home','davidg','libs');
 else
@@ -12,6 +17,7 @@ end
 
 % Include local visionary folder
 addpath(fullfile(pwd, 'visionary'));
+mex(fullfile(pwd, 'visionary','calibrated_fivepoint_helper.c'));
 
 % Include calibration toolbox folder
 addpath(fullfile(lib_folder,'TOOLBOX_calib'));

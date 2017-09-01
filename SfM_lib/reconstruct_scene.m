@@ -1,7 +1,11 @@
+function reconstruct_scene(datafolder)
+
+thisfolder = pwd;
+
 %Read settings
-cd corner/
-settings = reconstr_setup_corner;
-cd ..
+cd(datafolder)
+settings = reconstr_setup;
+cd(thisfolder)
 
 %Perform pairwise matching for all pairs, (unless camera_graph is
 %specified)
