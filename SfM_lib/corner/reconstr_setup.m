@@ -12,24 +12,18 @@ settings.PeakThresh = 0;
 settings.EdgeThresh = 10;
 settings.forbidden = [];
 settings.storesift = 0; %save sift correspondences?
+settings.expectedEpipole = [];
 
 
 
 %Select the images
-settings.img_path = 'C:\Users\fredrik\Documents\MATLAB\carl_olsson_system\corner\'; %C:\Users\Calle\Desktop\dataset\dkyrkan3\corner\';
-settings.imnames = dir(strcat(settings.img_path,'*.JPG'));
+settings.img_path = [pwd filesep];
+settings.imnames = dir(fullfile(settings.img_path,'*.JPG'));
 
 %path to where to save results
-settings.save_path = '.\corner\';
-
-%Path to Lowes SIFT-implementation
-settings.SIFT_path = 'C:\Users\fredrik\Documents\MATLAB\siftdemov4\';
-
-%Setup VLfeat.
-fold = pwd;
-cd C:\Users\fredrik\Documents\MATLAB\vlfeat-0.9.13\toolbox\
-vl_setup
-cd(fold);
+%Default is to save in a folder within the datafolder
+settings.save_path = fullfile(pwd,'savefiles');
+if ~exist('savefiles'), mkdir('savefiles'); end;
 
 %Rescales the images to speed up SIFT.
 settings.scale = 0.5;

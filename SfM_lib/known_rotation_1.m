@@ -5,8 +5,10 @@ pixtol1 = settings.pixtol1;
 KK = settings.KK;
 mininlnr = settings.mininlnr;
 
-load(strcat(save_path,'rotations2.mat'));
-load(strcat(save_path,'impoints3.mat'));
+load(fullfile(save_path,'rotations2.mat'));
+load(fullfile(save_path,'impoints3.mat'));
+
+%keyboard;
 
 %Ta bort punkter som inte syns i tillräckligt många kameror
 vis = zeros(1,u.pointnr);
@@ -103,16 +105,16 @@ for i = 1:length(P);
 end
 
 %Spara structure rörelse
-save(strcat(save_path,'str_mot.mat'), 'U', 'P', 'u');
-save(strcat(save_path,'rotations3.mat'),'A');
-load(strcat(save_path,'impoints3.mat'));
+save(fullfile(save_path,'str_mot.mat'), 'U', 'P', 'u');
+save(fullfile(save_path,'rotations3.mat'),'A');
+load(fullfile(save_path,'impoints3.mat'));
 u.points = u.points(good_cams);
 if settings.storesift==1,
     u.sift = u.sift(good_cams);
 end
 u.index = u.index(good_cams);
 imnames = imnames(good_cams);
-save(strcat(save_path,'impoints4.mat'),'u','imnames');
+save(fullfile(save_path,'impoints4.mat'),'u','imnames');
 
 
 

@@ -3,7 +3,7 @@ save_path = settings.save_path;
 uncertin_tol = settings.uncertin_tol;
 
 if nargin<2,
-    load(strcat(save_path,'str_mot2.mat'));
+    load(fullfile(save_path,'str_mot2.mat'));
 end
 d2f = zeros(size(U,2),9);
 
@@ -150,5 +150,5 @@ for i = 1:length(u.points);
 end    
 u.pointnr = sum(~rmpoints);
 if nargin<2,
-    save(strcat(save_path,'red_str_mot.mat'),'u','U','P');
+    save(fullfile(save_path,'red_str_mot.mat'),'u','U','P');
 end

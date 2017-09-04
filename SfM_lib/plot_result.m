@@ -12,6 +12,13 @@ kc = settings.kc;
 figure(1);
 plot3(U(1,:),U(2,:),U(3,:),'.')
 axis equal;
+ulow = quantile(U',0.1);
+uhigh = quantile(U',0.9);
+uspan = uhigh-ulow;
+uhigh = uhigh + 0.1*uspan;
+ulow = ulow - 0.1*uspan;
+axis([ulow(1) uhigh(1) ulow(2) uhigh(2) ulow(3) uhigh(3)])
+
 for i=imindex;
     figure(2+mod(i-1,20));
     filename = strcat(img_path,imnames(i).name);

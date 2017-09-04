@@ -5,9 +5,9 @@ merge_tracks = settings.merge_tracks;
 KK = settings.KK;
 kc = settings.kc;
 
-load(strcat(save_path,'impoints2.mat'));
-load(strcat(save_path,'pairwise_geom2.mat'));
-load(strcat(save_path,'rotations_inliers2.mat'));
+load(fullfile(save_path,'impoints2.mat'));
+load(fullfile(save_path,'pairwise_geom2.mat'));
+load(fullfile(save_path,'rotations_inliers2.mat'));
 
 
 G = zeros(size(pairwise_geom));
@@ -166,7 +166,10 @@ while max(Gtmp(:)) ~= 0
             u.pointnr = u.pointnr - sum(non_conflict);
         end
     end
-    [sum(unseen) sum(unseen_cam2) sum(unseen_cam1) sum(seen)]
+    %[sum(unseen) sum(unseen_cam2) sum(unseen_cam1) sum(seen)]
+    if settings.debug_match
+        fprintf('Unseen II: %5d, %5d, %5d. Seen %5d.\n',sum(unseen),sum(unseen_cam2),sum(unseen_cam1),sum(seen));
+    end
     
     G(i,j) = 0;
     G(j,i) = 0;
@@ -195,10 +198,10 @@ if settings.storesift==1
 end
 u.index = u.index(S);
 imnames = imnames(S);
-save(strcat(save_path,'impoints3.mat'),'u','imnames');
-load(strcat(save_path,'rotations2.mat'),'A');
+save(fullfile(save_path,'impoints3.mat'),'u','imnames');
+load(fullfile(save_path,'rotations2.mat'),'A');
 A = A(S);
-save(strcat(save_path,'rotations2.mat'),'A');
+save(fullfile(save_path,'rotations2.mat'),'A');
 
 
 if 0
