@@ -21,7 +21,9 @@ settings.img_path = [pwd filesep];
 settings.imnames = dir(fullfile(settings.img_path,'*.JPG'));
 
 %path to where to save results
-settings.save_path = '.\corner\';
+%Default is to save in a folder within the datafolder
+settings.save_path = fullfile(pwd,'savefiles');
+if ~exist('savefiles'), mkdir('savefiles'); end;
 
 %Rescales the images to speed up SIFT.
 settings.scale = 0.5;

@@ -5,8 +5,8 @@ pixtol2 = settings.pixtol2;
 KK = settings.KK;
 mininlnr = settings.mininlnr;
 
-load(strcat(save_path,'rotations3.mat'));
-load(strcat(save_path,'impoints4.mat'));
+load(fullfile(save_path,'rotations3.mat'));
+load(fullfile(save_path,'impoints4.mat'));
 
 vis = zeros(1,u.pointnr);
 for i=1:length(u.points)
@@ -34,7 +34,11 @@ u.pointnr = sum(vis);
 %[U,P,s] = krot4_feas_LP_sparse(u,A,pixtol2./KK(1,1),0.01,100);
 [U,P,s] = krot4_feas_LP_sparse(u,A,pixtol2./KK(1,1),0.01,1);
 s0 = s;
-outlnr = sum(s > 1e-5)
+outlnr = sum(s > 1e-5);
+if settings.debug_match
+    fprintf('KnownRotationII: Nr of Outliers: %3d.\n',outlnr);
+end
+
 for i = 1:length(P);
     uu = NaN*ones(3,u.pointnr);
     uu(:,u.index{i}) = u.points{i};
@@ -49,7 +53,7 @@ for i = 1:length(P);
     end
     u.index{i} = find(isfinite(uu(1,:)));
     u.points{i} = uu(:,u.index{i});
-    s = s(res+1:end);    
+    s = s(res+1:end);
 end
 
 [U,P] = modbundle_sparse(U,P,u,20,0.01);
@@ -68,9 +72,9 @@ end
 %    u_uncalib.sift{i} = u.sift{i};
 %end
 
-%save(strcat(save_path,'str_mot.mat'), 'U', 'P', 'P_uncalib', 'u', 'u_uncalib','imnames');
-save(strcat(save_path,'str_mot.mat'), 'U', 'P', 'u', 'imnames');
-save(strcat(save_path,'rotations3.mat'),'A');
+%save(fullfile(save_path,'str_mot.mat'), 'U', 'P', 'P_uncalib', 'u', 'u_uncalib','imnames');
+save(fullfile(save_path,'str_mot.mat'), 'U', 'P', 'u', 'imnames');
+save(fullfile(save_path,'rotations3.mat'),'A');
 
 function y = pflat(x)
 y = x./repmat(x(end,:),[size(x,1) 1]);

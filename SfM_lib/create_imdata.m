@@ -2,7 +2,7 @@ function create_imdata(settings)
 save_path = settings.save_path;
 merge_tracks = settings.merge_tracks;
 
-load(strcat(save_path,'pairwise_matchings.mat'));
+load(fullfile(save_path,'pairwise_matchings.mat'));
 
 G = zeros(size(pairwiseEst));
 for i = 1:size(pairwiseEst,1);
@@ -28,7 +28,7 @@ end
 impoints.index = cell(size(imnames));
 
 while max(G(:)) ~= 0
-
+    
     %Choose the pair with the most matches.
     Gtmp = repmat(S,[1 length(S)]).*G;
     [i,j] = find(Gtmp == max(Gtmp(:)));
@@ -53,7 +53,7 @@ while max(G(:)) ~= 0
     [uniqind1,I,J] = unique(ind1);
     ind2 = ind2(I);
     ind1 = ind1(I);
-        
+    
     %Check which points have been added to tracks eariler.
     [members1,positions1] = ismember(ind1,siftind{i});
     [members2,positions2] = ismember(ind2,siftind{j});
@@ -93,7 +93,7 @@ while max(G(:)) ~= 0
         impoints.sift{j} = [impoints.sift{j} SIFT{j}.desc(new_siftind2,:)'];
     end
     siftind{j} = [siftind{j} new_siftind2];
-           
+    
     
     %Add points that has been seen in camera j previously
     unseen_cam1 = (~members1) & members2;
@@ -148,7 +148,10 @@ while max(G(:)) ~= 0
             impoints.pointnr = impoints.pointnr - sum(non_conflict);
         end
     end
-    [sum(unseen) sum(unseen_cam2) sum(unseen_cam1) sum(seen)]
+    if settings.debug_match
+        fprintf('Unseen: %5d, %5d, %5d. Seen %5d.\n',sum(unseen),sum(unseen_cam2),sum(unseen_cam1),sum(seen));
+    end
+    %[sum(unseen) sum(unseen_cam2) sum(unseen_cam1) sum(seen)]
     
     G(i,j) = 0;
     G(j,i) = 0;
@@ -160,7 +163,8 @@ while max(G(:)) ~= 0
     end
 end
 
-save(strcat(save_path,'impoints.mat'),'impoints','imnames');
+%keyboard;
+save(fullfile(save_path,'impoints.mat'),'impoints','imnames');
 
 if 0 %Debug code
     i = 1;
@@ -171,8 +175,8 @@ if 0 %Debug code
     p2(:,impoints.index{j}) = impoints.points{j};
     vis = isfinite(p1(1,:)) & isfinite(p2(1,:));
     figure(1);
-    plot(imagedata(strcat(img_path,imnames(i).name),p1(:,vis)));
+    plot(imagedata(fullfile(imnames(i).folder,imnames(i).name),p1(:,vis)));
     figure(2);
-    plot(imagedata(strcat(img_path,imnames(j).name),p2(:,vis)));
+    plot(imagedata(fullfile(imnames(j).folder,imnames(j).name),p2(:,vis)));
 end
 

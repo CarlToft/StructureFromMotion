@@ -3,19 +3,19 @@ save_path = settings.save_path;
 mincorrnr = settings.mincorrnr;
 roterrtol = settings.roterrtol;
 
-load(strcat(save_path,'pairwise_geom.mat'));
-load(strcat(save_path,'impoints.mat'));
+load(fullfile(save_path,'pairwise_geom.mat'));
+load(fullfile(save_path,'impoints.mat'));
 
 G = zeros(size(pairwise_geom));
 for i = 1:size(pairwise_geom,1)
     for j = 1:size(pairwise_geom,1)
         if ~isempty(pairwise_geom{i,j})
-             G(i,j) = length(pairwise_geom{i,j}.inliers);
-             L(i,j) = -1;
-             if G(i,j) < mincorrnr;
-                 G(i,j) = 0;
-                 L(i,j) = 0;
-             end
+            G(i,j) = length(pairwise_geom{i,j}.inliers);
+            L(i,j) = -1;
+            if G(i,j) < mincorrnr;
+                G(i,j) = 0;
+                L(i,j) = 0;
+            end
         end
     end
 end
@@ -54,7 +54,7 @@ for jj = 1:100
             i = i(ind);
             j = j(ind);
         end
-
+        
         campairs = [campairs [i;j;W(ind)]];
         %Relative orientaiton (from epipolar geometry)
         if i < j
@@ -69,7 +69,7 @@ for jj = 1:100
         A{j} = P2(:,1:3)*R1*R2;
         S(j) = 1;
     end
-
+    
     res = zeros(size(pairwise_geom));
     weightres = zeros(size(pairwise_geom));
     inl = zeros(size(pairwise_geom));
@@ -80,7 +80,7 @@ for jj = 1:100
                 if ~isempty(A{i}) && ~isempty(A{j});
                     T = inv(A{i}(:,1:3));
                     A1 = A{j}*T;
-                                        
+                    
                     if 0 %Correct metric, but somthing wrong...
                         relrot = A1'*P2(:,1:3);
                         [~,~,V] = svd(relrot-eye(3));
@@ -104,17 +104,28 @@ for jj = 1:100
             end
         end
     end
-    if sum(sum(inl)) > sum(sum(maxinl)); 
+    if sum(sum(inl)) > sum(sum(maxinl));
         Amax = A;
         maxinl = inl;
         maxres = res;
         maxweightres = weightres;
         maxcampairs = campairs;
     end
-    [jj sum(sum(maxinl))]
+    if settings.debug_match
+        fprintf('RANSAC_ROT1, Iteration: %3d. Max Inliers: %5d.\n',jj,sum(sum(maxinl)));
+    end
+    %[jj sum(sum(maxinl))]
 end
-sum(maxres(:))
-sum(maxinl(:))
+
+if settings.debug_match
+    fprintf('RANSAC_ROT1, Max Res: %f.\n',sum(maxres(:)));
+end
+if settings.debug_match
+    fprintf('RANSAC_ROT1, Max Inl: %4d.\n',sum(maxinl(:)));
+end
+%sum(maxres(:))
+%sum(maxinl(:))
+%keyboard;
 A = Amax;
-save(strcat(save_path,'rotations_inliers.mat'),'maxinl');
-save(strcat(save_path,'rotations.mat'),'A');
+save(fullfile(save_path,'rotations_inliers.mat'),'maxinl');
+save(fullfile(save_path,'rotations.mat'),'A');
