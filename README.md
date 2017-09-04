@@ -34,7 +34,7 @@ below refered to as the library path.
 The example is executed with `reconstruct_corner.m` and uses data from the folder `corner`.
 Settings for the reconstruction are found in `corner/reconstr_setup.m`.
 1. `cd SfM_lib`
-2. Run `reconstruct_scene.m`
+2. Run `reconstruct_corner.m`
 
 ## Running on your images
 1. Put your images in a folder together with your settings file named `reconstr_setup.m`.
