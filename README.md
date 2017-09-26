@@ -2,9 +2,6 @@
 
 ## Installing Dependencies
 
-### CVX
-Download standard bundle from http://cvxr.com/cvx/download/
-
 ### MOSEK
 1. Download here https://mosek.com/downloads. Academic license is available.
 2. For Unix/Linux, start MATLAB with `LD_LIBRARY_PATH="<mosek_root>/8/tools/platform/linux64x86/bin" matlab`.
