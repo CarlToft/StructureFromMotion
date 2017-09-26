@@ -13,6 +13,7 @@ settings.EdgeThresh = 10;
 settings.forbidden = [];
 settings.storesift = 0; %save sift correspondences?
 settings.expectedEpipole = [];
+settings.debug_match=false;
 
 
 
@@ -29,7 +30,7 @@ if ~exist('savefiles'), mkdir('savefiles'); end;
 settings.scale = 0.5;
 
 %RANSAC_threshold
-settings.RANSAC_pixtol = 2.5; %Tolerans vid RANSAC-körning
+settings.RANSAC_pixtol = 2.5; %Tolerans vid RANSAC-kï¿½rning
 
 %Minimum number matches to compute two-view geometris
 settings.mininlnr = 20;
