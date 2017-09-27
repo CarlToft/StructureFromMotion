@@ -4,7 +4,8 @@
 
 ### MOSEK
 1. Download here https://mosek.com/downloads. Academic license is available.
-2. For Unix/Linux, start MATLAB with `LD_LIBRARY_PATH="<mosek_root>/8/tools/platform/linux64x86/bin" matlab`.
+2. Remember to copy place the license file according to MOSEK install instructions.
+3. For Unix/Linux, start MATLAB with `LD_LIBRARY_PATH="<mosek_root>/8/tools/platform/linux64x86/bin" matlab`.
 This is done in `matlab_start.sh`.
 
 ### VLFEAT
@@ -17,15 +18,15 @@ Download and unpack http://www.cs.ubc.ca/~lowe/keypoints/siftDemoV4.zip.
 Download and unpack http://www.vision.caltech.edu/bouguetj/calib_doc/.
 
 ## Initiate session
-The setup code assumes that the above libs have been placed in a common folder , 
-below refered to as the library path.
+The setup code assumes that the above libs have been placed in a common folder ,
+below referred to as the library path.
 
 **For Unix/Linux:**
-1. Start matlab with `./start_matlab.sh <your library path>`.
+1. Start matlab with `./start_matlab.sh <absolute library path>`.
 2. Run `setup.m`
 
 **Otherwise:**
-1. Run `setup.m <your library path>`
+1. Run `setup.m <absolute library path>`
 
 ## Running the example
 The example is executed with `reconstruct_corner.m` and uses data from the folder `corner`.

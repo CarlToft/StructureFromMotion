@@ -8,11 +8,17 @@ if nargin<1,
 end
 
 if isempty(lib_env)
-    % If you are NOT using the environment variable,
-    % change this match your folder structure.
-    lib_folder = fullfile('/','home','davidg','libs');
+    % No lib path was supplied.
+    error('Please supply a path to the dependency libraries');
 else
     lib_folder = fullfile(lib_env);
+end
+
+% Check that the path is absolute
+is_relative = isempty(regexp(lib_folder(1),'[/\\]', 'once'));
+if is_relative 
+    lib_folder = fullfile(pwd, lib_folder);
+    disp(['Correcting relative path to: ' lib_folder]);
 end
 
 % Include local visionary folder
