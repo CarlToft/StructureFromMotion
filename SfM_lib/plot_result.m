@@ -21,7 +21,7 @@ axis([ulow(1) uhigh(1) ulow(2) uhigh(2) ulow(3) uhigh(3)])
 
 for i=imindex;
     figure(2+mod(i-1,20));
-    filename = strcat(img_path,imnames(i).name);
+    filename = fullfile(img_path,imnames(i).name);
     if isfield(imnames(i),'ts'),
         im = LoadImage(filename, imnames(i).ts, settings.LUT);
     else
