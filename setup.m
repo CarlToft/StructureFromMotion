@@ -21,8 +21,9 @@ if is_relative
     disp(['Correcting relative path to: ' lib_folder]);
 end
 
-% Include local visionary folder
+% Include local folders
 addpath(fullfile(pwd, 'visionary'));
+addpath(fullfile(pwd, 'SfM_lib'));
 mex(fullfile(pwd, 'visionary','calibrated_fivepoint_helper.c'));
 
 % Include calibration toolbox folder
