@@ -37,7 +37,7 @@ if 0,
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % RUN THE SCRIPT BELOW TO CREATE MESH and ANNOTATIONS
-load C:\Users\fredrik\Documents\MATLAB\sfm_library\data/instanceRecognition/instance_sequences/experiment2/result_anno.mat
+eval(['load ',bib,file,'result_anno.mat']);
 
 
 %figure(1);clf;trisurf(trishelf',Ushelf(1,:),Ushelf(2,:),Ushelf(3,:));axis equal;rotate3d on;
