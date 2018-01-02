@@ -74,7 +74,7 @@ fclose(fid);
 
 
 % Open "list.txt"
-filename = [bibdir,'/list.txt'];
+filename = [bibdir,filesep,'list.txt'];
 fid = fopen(filename);
 
 imnames={};
@@ -90,7 +90,7 @@ fclose(fid);
 
 for ii=1:length(im0),
     tmpindex=find(index==ii);
-    tmpfile = [bibdir,'/',imnames{tmpindex}];
+    tmpfile = [bibdir,filesep,imnames{tmpindex}];
     tmpim=imread(tmpfile);
     pp(1,ii)=size(tmpim,2)/2;
     pp(2,ii)=size(tmpim,1)/2;
