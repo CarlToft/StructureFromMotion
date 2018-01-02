@@ -28,14 +28,21 @@ load result_anno_updated_path
 % Add points for shelves and update reconstruction
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
 % [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
-load pts_incl_shelves_updated_cameras
+load result1_shelves_and_updated_cameras
 
 
 
 
-% Add points for bottles, from right to left. 4 regular Coca-Cola, 3 Coca-Cola Zero.
+% Add points for upper right shelf of bottles.
+% Bottles from right to left. 4 regular Coca-Cola, followed by 3 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-load pts_incl_shelves_and_bottles
+load result2a_upper_right_bottles
+
+
+% Add points for upper left shelf of bottles.
+% Bottles from right to left. 6 regular Coca-Cola, followed by 2 Coca-Cola Zero.
+% [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[210,220,230,290]);
+load result2b_upper_left_bottles
 
 
 
@@ -125,7 +132,7 @@ triobj = zeros(3,0);
 labelobj = zeros(1,0);
 labeltype = zeros(1,0);
 
-%plane 1 of bottles
+% Upper right shelf with bottles
 v1 = Utri(:,26)-Utri(:,25);
 v2 = Utri(:,27)-Utri(:,26);
 
@@ -133,28 +140,10 @@ n = cross(v1,v2);n= n/norm(n);
 pl = [n;-n'*Utri(:,25)];
 
 
-labeltype = [labeltype,2,1,2,2,1,1];
 
-% 4 Regular Coca-Cola bottles
-for ii=nbrpoints_anno+[1:4],
-    labelcnt = labelcnt+1;
-    ll = -n'*U(1:3,ii)-pl(4);
-    Uplane = U(1:3,ii)+ll*n;
-
-    sc = norm(Uplane-U(1:3,ii));
-
-    R = [null(n'), n]; if det(R)<0,R=[R(:,2),R(:,1),R(:,3)];end
-    T = [sc*R,Uplane;[0,0,0,1]];
-
-    Utmp=T(1:3,:)*pextend(Ubottle);
-
-    triobj = [triobj,tribottle+size(Uobj,2)];
-    Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
-end
-
-% 3 Coca-Cola Zero bottles
-for ii=nbrpoints_anno+[5:7],
+% 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
+labeltype = [labeltype,1,1,1,1,2,2,2];
+for ii=nbrpoints_anno+[1:7],
     labelcnt = labelcnt+1;
     ll = -n'*U(1:3,ii)-pl(4);
     Uplane = U(1:3,ii)+ll*n;
@@ -174,22 +163,16 @@ end
 
 
 
-% THE FOLLOWING IS OLD
-STOP_HERE
-
-
-
-
-
-%plane 2 of bottles
-v1 = Utri(:,85+26)-Utri(:,85+25);
-v2 = Utri(:,85+27)-Utri(:,85+26);
+% Upper left shelf with bottles
+v1 = Utri(:,32*2+26)-Utri(:,32*2+25);
+v2 = Utri(:,32*2+27)-Utri(:,32*2+26);
 
 n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,85+25)];
+pl = [n;-n'*Utri(:,32*2+25)];
 
-labeltype = [labeltype,1,1,2,2,1,1,1,2,2];
-for ii=nbrpoints_anno+[7:15],
+% 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
+labeltype = [labeltype,1,1,1,1,1,1,2,2];
+for ii=nbrpoints_anno+[8:15],
     Upp = U(1:3,ii);
     labelcnt=labelcnt+1;
     labeltype(labelcnt) = 1; %cocacola pet 1.5 litre
@@ -207,6 +190,11 @@ for ii=nbrpoints_anno+[7:15],
     Uobj=[Uobj,Utmp];
     labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
 end
+
+
+
+% THE FOLLOWING IS OLD
+STOP_HERE
 
 
 
