@@ -8,60 +8,38 @@
 
 
 %bib='C:\Users\fredrik\Documents\MATLAB\sfm_library\data\InstanceRecognition\instance_sequences\';
-bib='C:\Users\fredrik\Dropbox\tmp\Lucas\InstanceRecognition\instance_sequences\';
+%bib='C:\Users\fredrik\Dropbox\tmp\Lucas\InstanceRecognition\instance_sequences\';
+bib='/home/lucas/instance_deps/InstanceRecognition/instance_sequences/';
 
-file='GOPR1830\';
-
-if 0,
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    
-    %load settings and result file
-    load([bib,file,'result.mat']);
-    nbrpoints_sfm = size(U,2);
-
-    mot = motion(P_uncalib);
-    figure(1);clf;plot(mot);axis equal;
+file='GOPR1830/';
 
 
-%%%%%%%%%%%%%%%%%%%
-
-%now we add points defining planes
-
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
-    
-    [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
-    
-    %save C:\Users\fredrik\Documents\MATLAB\sfm_library\data/instanceRecognition/instance_sequences/experiment2/result_anno.mat settings P_uncalib u_uncalib U nbrpoints_sfm
-
-end
-if true
-%now we add points defining planes
-
-%     4 Regular Coca-Cola bottles
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-
-%     3 Coca-Cola Zero bottles
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-    [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
-    
-    [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
-    
-    %save C:\Users\fredrik\Documents\MATLAB\sfm_library\data/instanceRecognition/instance_sequences/experiment2/result_anno.mat settings P_uncalib u_uncalib U nbrpoints_sfm
-
-end
-STOP
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% RUN THE SCRIPT BELOW TO CREATE MESH and ANNOTATIONS
-eval(['load ',bib,file,'result_anno.mat']);
 
 
-%figure(1);clf;trisurf(trishelf',Ushelf(1,:),Ushelf(2,:),Ushelf(3,:));axis equal;rotate3d on;
+
+%load settings and result file
+% load([bib,file,'result.mat']);
+% eval(['load ',bib,file,'result_anno.mat']);
+load result_anno_updated_path
+
+
+
+
+% Add points for shelves and update reconstruction
+% [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
+% [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
+load pts_incl_shelves_updated_cameras
+
+
+
+
+% Add points for bottles, from right to left. 4 regular Coca-Cola, 3 Coca-Cola Zero.
+% [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
+load pts_incl_shelves_and_bottles
+
+
+
+
 
 %construct mesh
 nbrpoints_total = size(U,2);
@@ -128,7 +106,7 @@ Utri = [Utri,Ushelf];
 % ADD OBJECTS
 %bottles
 
-nbrpoints_anno = nbrpoints_sfm+18;
+nbrpoints_anno = nbrpoints_sfm+17;
 
 alpha = 0:0.4:2*pi;rr = 0.13;height=0.8;nn=length(alpha);
 Ubottle=[rr*cos(alpha),rr*cos(alpha),0;rr*sin(alpha),rr*sin(alpha),0;zeros(size(alpha)),height*ones(size(alpha)),1];
@@ -471,29 +449,3 @@ for imindex = 1:48,imindex
     pause
     close(imindex);
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
