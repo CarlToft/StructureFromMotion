@@ -103,8 +103,11 @@ mesh.shelf3 = struct();
 
 
 % ADD OBJECTS
-%bottles
+%labels
+instance_cnt=0;
 
+
+%bottles
 alpha = 0:0.4:2*pi;rr = 0.13;height=0.8;nn=length(alpha);
 Ubottle=[rr*cos(alpha),rr*cos(alpha),0;rr*sin(alpha),rr*sin(alpha),0;zeros(size(alpha)),height*ones(size(alpha)),1];
 tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
@@ -112,10 +115,9 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
              nn+1:2*nn, [2:nn,1]       , [nn+2:2*nn,nn+1]];
 %figure(1);clf;trisurf(tribottle',Ubottle(1,:),Ubottle(2,:),Ubottle(3,:));axis equal;rotate3d on;
 
-%labels
-instance_cnt=0;
 
-%gravity vector
+
+% Upper right shelf with bottles
 
 mesh.right_shelf_bottles = struct();
 mesh.right_shelf_bottles.U = zeros(3,0);
@@ -126,7 +128,6 @@ labels.right_shelf_bottles = struct()
 labels.right_shelf_bottles.class_labels = [1,1,1,1,2,2,2];
 labels.right_shelf_bottles.instance_labels = zeros(1,0);
 
-% Upper right shelf with bottles
 v1 = mesh.shelf1.U(:,26)-mesh.shelf1.U(:,25);
 v2 = mesh.shelf1.U(:,27)-mesh.shelf1.U(:,26);
 
@@ -154,6 +155,8 @@ end
 
 
 
+% Upper left shelf with bottles
+
 mesh.left_shelf_bottles = struct();
 mesh.left_shelf_bottles.U = zeros(3,0);
 mesh.left_shelf_bottles.tri = zeros(3,0);
@@ -163,7 +166,6 @@ labels.left_shelf_bottles = struct()
 labels.left_shelf_bottles.class_labels = [1,1,1,1,1,1,2,2];
 labels.left_shelf_bottles.instance_labels = zeros(1,0);
 
-% Upper left shelf with bottles
 v1 = mesh.shelf3.U(:,26)-mesh.shelf3.U(:,25);
 v2 = mesh.shelf3.U(:,27)-mesh.shelf3.U(:,26);
 
