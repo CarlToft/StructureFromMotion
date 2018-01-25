@@ -23,12 +23,19 @@ file='GOPR1830/';
 load result_anno_updated_path
 
 
+% Create data structure to determine the source of all points in U & u_uncalib
+lookups = struct();
+% Indices for all SFM points
+lookups.sfm = create_lookups(U, u_uncalib);
+
+
 
 
 % Add points for shelves and update reconstruction
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
 % [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
 load result1_shelves_and_updated_cameras
+lookups.shelves = create_lookups(U, u_uncalib, [1,4,44,48], 17);
 
 
 
@@ -37,25 +44,25 @@ load result1_shelves_and_updated_cameras
 % Bottles from right to left. 4 regular Coca-Cola, followed by 3 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
 load result2a_upper_right_bottles
+lookups.right_shelf_bottles = create_lookups(U, u_uncalib, [60,68,44,48], 7);
 
 
 % Add points for upper left shelf of bottles.
 % Bottles from right to left. 6 regular Coca-Cola, followed by 2 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[210,220,230,290]);
 load result2b_upper_left_bottles
+lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
 
 
 
 
 
 %construct mesh
-nbrpoints_total = size(U,2);
-nbrpoints_Utri = nbrpoints_total-nbrpoints_sfm;
 Utri = zeros(3,0);
 tri = zeros(3,0);
 
 %add bookshelf 1
-Utmp = U(1:3,nbrpoints_sfm+[1:6]);
+Utmp = U(1:3, lookups.shelves.U_idx(1:6));
 shelfindex = [1,22,26,27,25,21];
 [trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
 
@@ -64,7 +71,7 @@ Utri = [Utri,Ushelf];
 
 
 %add bookshelf 2
-Utmp = U(1:3,nbrpoints_sfm+[7:12]);
+Utmp = U(1:3, lookups.shelves.U_idx(7:12));
 shelfindex = [22,2,1,26,25,7];
 [trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
 
@@ -72,7 +79,7 @@ tri = [tri,trishelf+size(Utri,2)];
 Utri = [Utri,Ushelf];
 
 %add bookshelf 3
-Utmp = U(1:3,nbrpoints_sfm+[13:17]);
+Utmp = U(1:3, lookups.shelves.U_idx(13:17));
 shelfindex = [2,6,1,25,22];
 [trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
 
@@ -113,8 +120,6 @@ Utri = [Utri,Ushelf];
 % ADD OBJECTS
 %bottles
 
-nbrpoints_anno = nbrpoints_sfm+17;
-
 alpha = 0:0.4:2*pi;rr = 0.13;height=0.8;nn=length(alpha);
 Ubottle=[rr*cos(alpha),rr*cos(alpha),0;rr*sin(alpha),rr*sin(alpha),0;zeros(size(alpha)),height*ones(size(alpha)),1];
 tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
@@ -143,7 +148,7 @@ pl = [n;-n'*Utri(:,25)];
 
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
 labeltype = [labeltype,1,1,1,1,2,2,2];
-for ii=nbrpoints_anno+[1:7],
+for ii=lookups.right_shelf_bottles.U_idx,
     labelcnt = labelcnt+1;
     ll = -n'*U(1:3,ii)-pl(4);
     Uplane = U(1:3,ii)+ll*n;
@@ -172,7 +177,7 @@ pl = [n;-n'*Utri(:,32*2+25)];
 
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
 labeltype = [labeltype,1,1,1,1,1,1,2,2];
-for ii=nbrpoints_anno+[8:15],
+for ii=lookups.left_shelf_bottles.U_idx,
     Upp = U(1:3,ii);
     labelcnt=labelcnt+1;
     labeltype(labelcnt) = 1; %cocacola pet 1.5 litre
