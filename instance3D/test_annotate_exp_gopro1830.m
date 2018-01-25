@@ -35,9 +35,10 @@ lookups.sfm = create_lookups(U, u_uncalib);
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
 % [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
 load result1_shelves_and_updated_cameras
-lookups.shelf1 = create_lookups(U, u_uncalib, [1,4,44,48], 6, 6+5);
-lookups.shelf2 = create_lookups(U, u_uncalib, [1,4,44,48], 6, 5);
-lookups.shelf3 = create_lookups(U, u_uncalib, [1,4,44,48], 5, 0);
+lookups.shelves = struct('U_idx', {}, 'u_idx', {});
+lookups.shelves(1) = create_lookups(U, u_uncalib, [1,4,44,48], 6, 6+5);
+lookups.shelves(2) = create_lookups(U, u_uncalib, [1,4,44,48], 6, 5);
+lookups.shelves(3) = create_lookups(U, u_uncalib, [1,4,44,48], 5, 0);
 
 
 
@@ -60,17 +61,17 @@ lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
 mesh = struct();
 labels = struct();
 
+mesh.shelves = struct('tri', {}, 'U', {});
 %add bookshelf 1
-mesh.shelf1 = struct();
-[mesh.shelf1.tri, mesh.shelf1.U] = annotate_addshelf(U(1:3, lookups.shelf1.U_idx), [1,22,26,27,25,21]);
+[mesh.shelves(1).tri, mesh.shelves(1).U] = annotate_addshelf(U(1:3, lookups.shelves(1).U_idx), [1,22,26,27,25,21]);
 
 %add bookshelf 2
-mesh.shelf2 = struct();
-[mesh.shelf2.tri, mesh.shelf2.U] = annotate_addshelf(U(1:3, lookups.shelf2.U_idx), [22,2,1,26,25,7]);
+% mesh.shelves(2) = struct();
+[mesh.shelves(2).tri, mesh.shelves(2).U] = annotate_addshelf(U(1:3, lookups.shelves(2).U_idx), [22,2,1,26,25,7]);
 
 %add bookshelf 3
-mesh.shelf3 = struct();
-[mesh.shelf3.tri, mesh.shelf3.U] = annotate_addshelf(U(1:3, lookups.shelf3.U_idx), [2,6,1,25,22]);
+% mesh.shelves(3) = struct();
+[mesh.shelves(3).tri, mesh.shelves(3).U] = annotate_addshelf(U(1:3, lookups.shelves(3).U_idx), [2,6,1,25,22]);
 
 
 % %blue berry covers
@@ -128,7 +129,7 @@ labels.right_shelf_bottles = struct()
 labels.right_shelf_bottles.class_labels = [1,1,1,1,2,2,2];
 labels.right_shelf_bottles.instance_labels = zeros(1,0);
 
-pl = get_plane(mesh.shelf1.U, 1);
+pl = get_plane(mesh.shelves(1).U, 1);
 n = pl(1:3);
 
 
@@ -163,7 +164,7 @@ labels.left_shelf_bottles = struct()
 labels.left_shelf_bottles.class_labels = [1,1,1,1,1,1,2,2];
 labels.left_shelf_bottles.instance_labels = zeros(1,0);
 
-pl = get_plane(mesh.shelf3.U, 1);
+pl = get_plane(mesh.shelves(3).U, 1);
 n = pl(1:3);
 
 for ii=lookups.left_shelf_bottles.U_idx,
@@ -187,7 +188,7 @@ end
 
 
 % Merge mesh
-[tri, Utri] = merge_mesh([mesh.shelf1, mesh.shelf2, mesh.shelf3]);
+[tri, Utri] = merge_mesh(mesh.shelves);
 
 [triobj, Uobj] = merge_mesh([ ...
     mesh.right_shelf_bottles, ...
@@ -231,16 +232,16 @@ Ucc = Usaft(:,ccindex);
 
 
 %plane of saft soppa
-v1 = mesh.shelf2.U(:,26)-mesh.shelf2.U(:,25);
-v2 = mesh.shelf2.U(:,27)-mesh.shelf2.U(:,26);
-v3 = mesh.shelf2.U(:,27)-mesh.shelf2.U(:,26);
-v4 = mesh.shelf2.U(:,14)-mesh.shelf2.U(:,12);
+v1 = mesh.shelves(2).U(:,26)-mesh.shelves(2).U(:,25);
+v2 = mesh.shelves(2).U(:,27)-mesh.shelves(2).U(:,26);
+v3 = mesh.shelves(2).U(:,27)-mesh.shelves(2).U(:,26);
+v4 = mesh.shelves(2).U(:,14)-mesh.shelves(2).U(:,12);
 
 n = cross(v1,v2);n= n/norm(n);
 n2 = cross(v3,v4);n2= n2/norm(n2);
 
 %n = n + 0.05*n2;n=n/norm(n);
-pl = [n;-n'*mesh.shelf2.U(:,25)-0.0001];
+pl = [n;-n'*mesh.shelves(2).U(:,25)-0.0001];
 
 cc = 0;
 for ii=nbrpoints_anno+[16:30],
@@ -281,7 +282,7 @@ end
 
 
 %three packages in random position
-pl = [n;-n'*mesh.shelf2.U(:,25)];
+pl = [n;-n'*mesh.shelves(2).U(:,25)];
 class_labels = [class_labels,4,5,5];
 for ii=nbrpoints_anno+[31:2:36],
     Upp1 = U(1:3,ii);
@@ -331,7 +332,7 @@ for ii=nbrpoints_anno+[31:2:36],
 end
 
 %three packages in random position
-pl = [n;-n'*mesh.shelf2.U(:,1)-0.0001];
+pl = [n;-n'*mesh.shelves(2).U(:,1)-0.0001];
 class_labels = [class_labels,4,5,5];
 for ii=nbrpoints_anno+[40:3:45],
     Upp1 = U(1:3,ii);
@@ -387,11 +388,11 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
 
 
 %plane of coke bottles
-v1 = mesh.shelf1.U(:,2)-mesh.shelf1.U(:,1);
-v2 = mesh.shelf1.U(:,7)-mesh.shelf1.U(:,2);
+v1 = mesh.shelves(1).U(:,2)-mesh.shelves(1).U(:,1);
+v2 = mesh.shelves(1).U(:,7)-mesh.shelves(1).U(:,2);
 
 n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*mesh.shelf1.U(:,1)];
+pl = [n;-n'*mesh.shelves(1).U(:,1)];
 
 
 Utop = U(1:3,nbrpoints_anno+[46:69]);
@@ -432,7 +433,7 @@ end
 
 
 
-figure(1);clf;trisurf(tri',mesh.shelf1.U(1,:),mesh.shelf1.U(2,:),mesh.shelf1.U(3,:));axis equal;rotate3d on;hold on;
+figure(1);clf;trisurf(tri',mesh.shelves(1).U(1,:),mesh.shelves(1).U(2,:),mesh.shelves(1).U(3,:));axis equal;rotate3d on;hold on;
 trisurf(triobj',Uobj(1,:),Uobj(2,:),Uobj(3,:));
 
 
