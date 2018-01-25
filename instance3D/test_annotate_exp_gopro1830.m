@@ -35,7 +35,9 @@ lookups.sfm = create_lookups(U, u_uncalib);
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
 % [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
 load result1_shelves_and_updated_cameras
-lookups.shelves = create_lookups(U, u_uncalib, [1,4,44,48], 17);
+lookups.shelf1 = create_lookups(U, u_uncalib, [1,4,44,48], 6, 6+5);
+lookups.shelf2 = create_lookups(U, u_uncalib, [1,4,44,48], 6, 5);
+lookups.shelf3 = create_lookups(U, u_uncalib, [1,4,44,48], 5, 0);
 
 
 
@@ -59,15 +61,15 @@ mesh = struct();
 
 %add bookshelf 1
 mesh.shelf1 = struct();
-[mesh.shelf1.tri, mesh.shelf1.U] = annotate_addshelf(U(1:3, lookups.shelves.U_idx(1:6)), [1,22,26,27,25,21]);
+[mesh.shelf1.tri, mesh.shelf1.U] = annotate_addshelf(U(1:3, lookups.shelf1.U_idx), [1,22,26,27,25,21]);
 
 %add bookshelf 2
 mesh.shelf2 = struct();
-[mesh.shelf2.tri, mesh.shelf2.U] = annotate_addshelf(U(1:3, lookups.shelves.U_idx(7:12)), [22,2,1,26,25,7]);
+[mesh.shelf2.tri, mesh.shelf2.U] = annotate_addshelf(U(1:3, lookups.shelf2.U_idx), [22,2,1,26,25,7]);
 
 %add bookshelf 3
 mesh.shelf3 = struct();
-[mesh.shelf3.tri, mesh.shelf3.U] = annotate_addshelf(U(1:3, lookups.shelves.U_idx(13:17)), [2,6,1,25,22]);
+[mesh.shelf3.tri, mesh.shelf3.U] = annotate_addshelf(U(1:3, lookups.shelf3.U_idx), [2,6,1,25,22]);
 
 
 % Merge mesh
