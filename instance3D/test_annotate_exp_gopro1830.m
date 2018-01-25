@@ -113,7 +113,7 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
 %figure(1);clf;trisurf(tribottle',Ubottle(1,:),Ubottle(2,:),Ubottle(3,:));axis equal;rotate3d on;
 
 %labels
-labelcnt=0;
+instance_cnt=0;
 
 %gravity vector
 
@@ -123,8 +123,8 @@ mesh.right_shelf_bottles.tri = zeros(3,0);
 
 labels.right_shelf_bottles = struct()
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
-labels.right_shelf_bottles.labeltype = [1,1,1,1,2,2,2];
-labels.right_shelf_bottles.labelobj = zeros(1,0);
+labels.right_shelf_bottles.class_labels = [1,1,1,1,2,2,2];
+labels.right_shelf_bottles.instance_labels = zeros(1,0);
 
 % Upper right shelf with bottles
 v1 = mesh.shelf1.U(:,26)-mesh.shelf1.U(:,25);
@@ -135,7 +135,7 @@ pl = [n;-n'*mesh.shelf1.U(:,25)];
 
 
 for ii=lookups.right_shelf_bottles.U_idx,
-    labelcnt = labelcnt+1;
+    instance_cnt = instance_cnt+1;
     ll = -n'*U(1:3,ii)-pl(4);
     Uplane = U(1:3,ii)+ll*n;
 
@@ -148,7 +148,7 @@ for ii=lookups.right_shelf_bottles.U_idx,
 
     mesh.right_shelf_bottles.tri = [mesh.right_shelf_bottles.tri,tribottle+size(mesh.right_shelf_bottles.U,2)];
     mesh.right_shelf_bottles.U = [mesh.right_shelf_bottles.U,Utmp];
-    labels.right_shelf_bottles.labelobj = [labels.right_shelf_bottles.labelobj,labelcnt*ones(1,size(tribottle,2))];
+    labels.right_shelf_bottles.instance_labels = [labels.right_shelf_bottles.instance_labels,instance_cnt*ones(1,size(tribottle,2))];
 end
 
 
@@ -160,8 +160,8 @@ mesh.left_shelf_bottles.tri = zeros(3,0);
 
 labels.left_shelf_bottles = struct()
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
-labels.left_shelf_bottles.labeltype = [1,1,1,1,1,1,2,2];
-labels.left_shelf_bottles.labelobj = zeros(1,0);
+labels.left_shelf_bottles.class_labels = [1,1,1,1,1,1,2,2];
+labels.left_shelf_bottles.instance_labels = zeros(1,0);
 
 % Upper left shelf with bottles
 v1 = mesh.shelf3.U(:,26)-mesh.shelf3.U(:,25);
@@ -172,7 +172,7 @@ pl = [n;-n'*mesh.shelf3.U(:,25)];
 
 for ii=lookups.left_shelf_bottles.U_idx,
     Upp = U(1:3,ii);
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
 
@@ -185,7 +185,7 @@ for ii=lookups.left_shelf_bottles.U_idx,
 
     mesh.left_shelf_bottles.tri = [mesh.left_shelf_bottles.tri,tribottle+size(mesh.left_shelf_bottles.U,2)];
     mesh.left_shelf_bottles.U = [mesh.left_shelf_bottles.U,Utmp];
-    labels.left_shelf_bottles.labelobj = [labels.left_shelf_bottles.labelobj,labelcnt*ones(1,size(tribottle,2))];
+    labels.left_shelf_bottles.instance_labels = [labels.left_shelf_bottles.instance_labels,instance_cnt*ones(1,size(tribottle,2))];
 end
 
 
@@ -200,9 +200,9 @@ end
     {mesh.right_shelf_bottles.U, mesh.left_shelf_bottles.U});
 
 % Merge labels
-[labelobj, labeltype] = merge_labels( ...
-    {labels.right_shelf_bottles.labelobj, labels.left_shelf_bottles.labelobj}, ...
-    {labels.right_shelf_bottles.labeltype, labels.left_shelf_bottles.labeltype});
+[instance_labels, class_labels] = merge_labels( ...
+    {labels.right_shelf_bottles.instance_labels, labels.left_shelf_bottles.instance_labels}, ...
+    {labels.right_shelf_bottles.class_labels, labels.left_shelf_bottles.class_labels});
 
 % THE FOLLOWING IS OLD
 STOP_HERE
@@ -248,15 +248,15 @@ pl = [n;-n'*mesh.shelf2.U(:,25)-0.0001];
 cc = 0;
 for ii=nbrpoints_anno+[16:30],
     Upp = U(1:3,ii);
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
     cc = cc +1;
     if cc==5,
         cc=1;
     end
     if cc<=8,
-        labeltype(labelcnt) = 5; %blackberry
+        class_labels(instance_cnt) = 5; %blackberry
     else
-        labeltype(labelcnt) = 4; %blueberry
+        class_labels(instance_cnt) = 4; %blueberry
     end
         
     ll = -n'*Upp-pl(4);
@@ -278,14 +278,14 @@ for ii=nbrpoints_anno+[16:30],
 
     triobj = [triobj,trisaft+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(trisaft,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(trisaft,2))];
 end
 
 
 
 %three packages in random position
 pl = [n;-n'*mesh.shelf2.U(:,25)];
-labeltype = [labeltype,4,5,5];
+class_labels = [class_labels,4,5,5];
 for ii=nbrpoints_anno+[31:2:36],
     Upp1 = U(1:3,ii);
     Upp2 = U(1:3,ii+1);
@@ -298,7 +298,7 @@ for ii=nbrpoints_anno+[31:2:36],
     end
     
     
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
         
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
@@ -330,18 +330,18 @@ for ii=nbrpoints_anno+[31:2:36],
 
     triobj = [triobj,trisaft+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(trisaft,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(trisaft,2))];
 end
 
 %three packages in random position
 pl = [n;-n'*mesh.shelf2.U(:,1)-0.0001];
-labeltype = [labeltype,4,5,5];
+class_labels = [class_labels,4,5,5];
 for ii=nbrpoints_anno+[40:3:45],
     Upp1 = U(1:3,ii);
     Upp2 = U(1:3,ii+1);
     Upp = U(1:3,ii+2);
     
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
         
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
@@ -369,7 +369,7 @@ for ii=nbrpoints_anno+[40:3:45],
 
     triobj = [triobj,trisaft+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(trisaft,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(trisaft,2))];
 end
 
 
@@ -414,8 +414,8 @@ for ii=nbrpoints_anno+[46:69],
     Upp = Upp+ll*toppl(1:3);
     
     
-    labelcnt=labelcnt+1;
-    labeltype(labelcnt) = 3; %cocacola can 33 cl
+    instance_cnt=instance_cnt+1;
+    class_labels(instance_cnt) = 3; %cocacola can 33 cl
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
 
@@ -428,7 +428,7 @@ for ii=nbrpoints_anno+[46:69],
 
     triobj = [triobj,tribottle+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(tribottle,2))];
 end
 
     
@@ -444,7 +444,7 @@ pause;
          
 
 for imindex = 1:48,imindex
-    annotate_plot(settings,P_uncalib,imindex, tri, Utri, triobj, Uobj, labelobj);
+    annotate_plot(settings,P_uncalib,imindex, tri, Utri, triobj, Uobj, instance_labels);
     pause
     close(imindex);
 end
