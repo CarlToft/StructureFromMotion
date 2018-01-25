@@ -72,11 +72,6 @@ mesh.shelf3 = struct();
 [mesh.shelf3.tri, mesh.shelf3.U] = annotate_addshelf(U(1:3, lookups.shelf3.U_idx), [2,6,1,25,22]);
 
 
-% Merge mesh
-tricell = {mesh.shelf1.tri, mesh.shelf2.tri, mesh.shelf3.tri};
-Utricell = {mesh.shelf1.U, mesh.shelf2.U, mesh.shelf3.U};
-[tri, Utri] = merge_mesh(tricell, Utricell);
-
 % %blue berry covers
 % tribox = [1,2,3;1,3,4;3,4,7;4,7,8;5,6,7;5,7,8;5,8,9;10,11,12;11,13,12;7,8,12;8,12,13]';
 % 
@@ -127,11 +122,11 @@ labelobj = zeros(1,0);
 labeltype = zeros(1,0);
 
 % Upper right shelf with bottles
-v1 = Utri(:,26)-Utri(:,25);
-v2 = Utri(:,27)-Utri(:,26);
+v1 = mesh.shelf1.U(:,26)-mesh.shelf1.U(:,25);
+v2 = mesh.shelf1.U(:,27)-mesh.shelf1.U(:,26);
 
 n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,25)];
+pl = [n;-n'*mesh.shelf1.U(:,25)];
 
 
 
@@ -158,11 +153,11 @@ end
 
 
 % Upper left shelf with bottles
-v1 = Utri(:,32*2+26)-Utri(:,32*2+25);
-v2 = Utri(:,32*2+27)-Utri(:,32*2+26);
+v1 = mesh.shelf3.U(:,26)-mesh.shelf3.U(:,25);
+v2 = mesh.shelf3.U(:,27)-mesh.shelf3.U(:,26);
 
 n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,32*2+25)];
+pl = [n;-n'*mesh.shelf3.U(:,25)];
 
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
 labeltype = [labeltype,1,1,1,1,1,1,2,2];
@@ -185,6 +180,12 @@ for ii=lookups.left_shelf_bottles.U_idx,
     labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
 end
 
+
+
+% Merge mesh
+tricell = {mesh.shelf1.tri, mesh.shelf2.tri, mesh.shelf3.tri};
+Utricell = {mesh.shelf1.U, mesh.shelf2.U, mesh.shelf3.U};
+[tri, Utri] = merge_mesh(tricell, Utricell);
 
 
 % THE FOLLOWING IS OLD
@@ -217,16 +218,16 @@ Ucc = Usaft(:,ccindex);
 
 
 %plane of saft soppa
-v1 = Utri(:,32+26)-Utri(:,32+25);
-v2 = Utri(:,32+27)-Utri(:,32+26);
-v3 = Utri(:,32+27)-Utri(:,32+26);
-v4 = Utri(:,32+14)-Utri(:,32+12);
+v1 = mesh.shelf2.U(:,26)-mesh.shelf2.U(:,25);
+v2 = mesh.shelf2.U(:,27)-mesh.shelf2.U(:,26);
+v3 = mesh.shelf2.U(:,27)-mesh.shelf2.U(:,26);
+v4 = mesh.shelf2.U(:,14)-mesh.shelf2.U(:,12);
 
 n = cross(v1,v2);n= n/norm(n);
 n2 = cross(v3,v4);n2= n2/norm(n2);
 
 %n = n + 0.05*n2;n=n/norm(n);
-pl = [n;-n'*Utri(:,32+25)-0.0001];
+pl = [n;-n'*mesh.shelf2.U(:,25)-0.0001];
 
 cc = 0;
 for ii=nbrpoints_anno+[16:30],
@@ -267,7 +268,7 @@ end
 
 
 %three packages in random position
-pl = [n;-n'*Utri(:,32+25)];
+pl = [n;-n'*mesh.shelf2.U(:,25)];
 labeltype = [labeltype,4,5,5];
 for ii=nbrpoints_anno+[31:2:36],
     Upp1 = U(1:3,ii);
@@ -317,7 +318,7 @@ for ii=nbrpoints_anno+[31:2:36],
 end
 
 %three packages in random position
-pl = [n;-n'*Utri(:,32+1)-0.0001];
+pl = [n;-n'*mesh.shelf2.U(:,1)-0.0001];
 labeltype = [labeltype,4,5,5];
 for ii=nbrpoints_anno+[40:3:45],
     Upp1 = U(1:3,ii);
@@ -373,11 +374,11 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
 
 
 %plane of coke bottles
-v1 = Utri(:,2)-Utri(:,1);
-v2 = Utri(:,7)-Utri(:,2);
+v1 = mesh.shelf1.U(:,2)-mesh.shelf1.U(:,1);
+v2 = mesh.shelf1.U(:,7)-mesh.shelf1.U(:,2);
 
 n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,1)];
+pl = [n;-n'*mesh.shelf1.U(:,1)];
 
 
 Utop = U(1:3,nbrpoints_anno+[46:69]);
@@ -418,7 +419,7 @@ end
 
 
 
-figure(1);clf;trisurf(tri',Utri(1,:),Utri(2,:),Utri(3,:));axis equal;rotate3d on;hold on;
+figure(1);clf;trisurf(tri',mesh.shelf1.U(1,:),mesh.shelf1.U(2,:),mesh.shelf1.U(3,:));axis equal;rotate3d on;hold on;
 trisurf(triobj',Uobj(1,:),Uobj(2,:),Uobj(3,:));
 
 
