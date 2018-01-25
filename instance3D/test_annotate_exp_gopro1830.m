@@ -58,6 +58,7 @@ lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
 
 
 mesh = struct();
+labels = struct();
 
 %add bookshelf 1
 mesh.shelf1 = struct();
@@ -120,8 +121,10 @@ mesh.right_shelf_bottles = struct();
 mesh.right_shelf_bottles.U = zeros(3,0);
 mesh.right_shelf_bottles.tri = zeros(3,0);
 
-labelobj = zeros(1,0);
-labeltype = zeros(1,0);
+labels.right_shelf_bottles = struct()
+% 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
+labels.right_shelf_bottles.labeltype = [1,1,1,1,2,2,2];
+labels.right_shelf_bottles.labelobj = zeros(1,0);
 
 % Upper right shelf with bottles
 v1 = mesh.shelf1.U(:,26)-mesh.shelf1.U(:,25);
@@ -131,8 +134,6 @@ n = cross(v1,v2);n= n/norm(n);
 pl = [n;-n'*mesh.shelf1.U(:,25)];
 
 
-% 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
-labeltype = [labeltype,1,1,1,1,2,2,2];
 for ii=lookups.right_shelf_bottles.U_idx,
     labelcnt = labelcnt+1;
     ll = -n'*U(1:3,ii)-pl(4);
@@ -147,7 +148,7 @@ for ii=lookups.right_shelf_bottles.U_idx,
 
     mesh.right_shelf_bottles.tri = [mesh.right_shelf_bottles.tri,tribottle+size(mesh.right_shelf_bottles.U,2)];
     mesh.right_shelf_bottles.U = [mesh.right_shelf_bottles.U,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
+    labels.right_shelf_bottles.labelobj = [labels.right_shelf_bottles.labelobj,labelcnt*ones(1,size(tribottle,2))];
 end
 
 
@@ -157,6 +158,11 @@ mesh.left_shelf_bottles = struct();
 mesh.left_shelf_bottles.U = zeros(3,0);
 mesh.left_shelf_bottles.tri = zeros(3,0);
 
+labels.left_shelf_bottles = struct()
+% 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
+labels.left_shelf_bottles.labeltype = [1,1,1,1,1,1,2,2];
+labels.left_shelf_bottles.labelobj = zeros(1,0);
+
 % Upper left shelf with bottles
 v1 = mesh.shelf3.U(:,26)-mesh.shelf3.U(:,25);
 v2 = mesh.shelf3.U(:,27)-mesh.shelf3.U(:,26);
@@ -164,12 +170,9 @@ v2 = mesh.shelf3.U(:,27)-mesh.shelf3.U(:,26);
 n = cross(v1,v2);n= n/norm(n);
 pl = [n;-n'*mesh.shelf3.U(:,25)];
 
-% 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
-labeltype = [labeltype,1,1,1,1,1,1,2,2];
 for ii=lookups.left_shelf_bottles.U_idx,
     Upp = U(1:3,ii);
     labelcnt=labelcnt+1;
-    labeltype(labelcnt) = 1; %cocacola pet 1.5 litre
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
 
@@ -182,7 +185,7 @@ for ii=lookups.left_shelf_bottles.U_idx,
 
     mesh.left_shelf_bottles.tri = [mesh.left_shelf_bottles.tri,tribottle+size(mesh.left_shelf_bottles.U,2)];
     mesh.left_shelf_bottles.U = [mesh.left_shelf_bottles.U,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
+    labels.left_shelf_bottles.labelobj = [labels.left_shelf_bottles.labelobj,labelcnt*ones(1,size(tribottle,2))];
 end
 
 
@@ -196,6 +199,10 @@ end
     {mesh.right_shelf_bottles.tri, mesh.left_shelf_bottles.tri}, ...
     {mesh.right_shelf_bottles.U, mesh.left_shelf_bottles.U});
 
+% Merge labels
+[labelobj, labeltype] = merge_labels( ...
+    {labels.right_shelf_bottles.labelobj, labels.left_shelf_bottles.labelobj}, ...
+    {labels.right_shelf_bottles.labeltype, labels.left_shelf_bottles.labeltype});
 
 % THE FOLLOWING IS OLD
 STOP_HERE
