@@ -128,11 +128,8 @@ labels.right_shelf_bottles = struct()
 labels.right_shelf_bottles.class_labels = [1,1,1,1,2,2,2];
 labels.right_shelf_bottles.instance_labels = zeros(1,0);
 
-v1 = mesh.shelf1.U(:,26)-mesh.shelf1.U(:,25);
-v2 = mesh.shelf1.U(:,27)-mesh.shelf1.U(:,26);
-
-n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*mesh.shelf1.U(:,25)];
+pl = get_plane(mesh.shelf1.U, 1);
+n = pl(1:3);
 
 
 for ii=lookups.right_shelf_bottles.U_idx,
@@ -166,11 +163,8 @@ labels.left_shelf_bottles = struct()
 labels.left_shelf_bottles.class_labels = [1,1,1,1,1,1,2,2];
 labels.left_shelf_bottles.instance_labels = zeros(1,0);
 
-v1 = mesh.shelf3.U(:,26)-mesh.shelf3.U(:,25);
-v2 = mesh.shelf3.U(:,27)-mesh.shelf3.U(:,26);
-
-n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*mesh.shelf3.U(:,25)];
+pl = get_plane(mesh.shelf3.U, 1);
+n = pl(1:3);
 
 for ii=lookups.left_shelf_bottles.U_idx,
     Upp = U(1:3,ii);
