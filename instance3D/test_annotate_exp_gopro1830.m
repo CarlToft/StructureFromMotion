@@ -55,38 +55,25 @@ lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
 
 
 
-
-
-%construct mesh
-Utri = zeros(3,0);
-tri = zeros(3,0);
+mesh = struct();
 
 %add bookshelf 1
-Utmp = U(1:3, lookups.shelves.U_idx(1:6));
-shelfindex = [1,22,26,27,25,21];
-[trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
-
-tri = [tri,trishelf+size(Utri,2)];
-Utri = [Utri,Ushelf];
-
+mesh.shelf1 = struct();
+[mesh.shelf1.tri, mesh.shelf1.U] = annotate_addshelf(U(1:3, lookups.shelves.U_idx(1:6)), [1,22,26,27,25,21]);
 
 %add bookshelf 2
-Utmp = U(1:3, lookups.shelves.U_idx(7:12));
-shelfindex = [22,2,1,26,25,7];
-[trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
-
-tri = [tri,trishelf+size(Utri,2)];
-Utri = [Utri,Ushelf];
+mesh.shelf2 = struct();
+[mesh.shelf2.tri, mesh.shelf2.U] = annotate_addshelf(U(1:3, lookups.shelves.U_idx(7:12)), [22,2,1,26,25,7]);
 
 %add bookshelf 3
-Utmp = U(1:3, lookups.shelves.U_idx(13:17));
-shelfindex = [2,6,1,25,22];
-[trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
-
-tri = [tri,trishelf+size(Utri,2)];
-Utri = [Utri,Ushelf];
+mesh.shelf3 = struct();
+[mesh.shelf3.tri, mesh.shelf3.U] = annotate_addshelf(U(1:3, lookups.shelves.U_idx(13:17)), [2,6,1,25,22]);
 
 
+% Merge mesh
+tricell = {mesh.shelf1.tri, mesh.shelf2.tri, mesh.shelf3.tri};
+Utricell = {mesh.shelf1.U, mesh.shelf2.U, mesh.shelf3.U};
+[tri, Utri] = merge_mesh(tricell, Utricell);
 
 % %blue berry covers
 % tribox = [1,2,3;1,3,4;3,4,7;4,7,8;5,6,7;5,7,8;5,8,9;10,11,12;11,13,12;7,8,12;8,12,13]';
