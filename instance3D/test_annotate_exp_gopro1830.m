@@ -200,9 +200,8 @@ end
     {mesh.right_shelf_bottles.U, mesh.left_shelf_bottles.U});
 
 % Merge labels
-[instance_labels, class_labels] = merge_labels( ...
-    {labels.right_shelf_bottles.instance_labels, labels.left_shelf_bottles.instance_labels}, ...
-    {labels.right_shelf_bottles.class_labels, labels.left_shelf_bottles.class_labels});
+instance_labels = cell2mat({labels.right_shelf_bottles.instance_labels, labels.left_shelf_bottles.instance_labels});
+class_labels = cell2mat({labels.right_shelf_bottles.class_labels, labels.left_shelf_bottles.class_labels});
 
 % THE FOLLOWING IS OLD
 STOP_HERE
