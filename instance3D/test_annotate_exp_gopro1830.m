@@ -116,8 +116,10 @@ labelcnt=0;
 
 %gravity vector
 
-Uobj = zeros(3,0);
-triobj = zeros(3,0);
+mesh.right_shelf_bottles = struct();
+mesh.right_shelf_bottles.U = zeros(3,0);
+mesh.right_shelf_bottles.tri = zeros(3,0);
+
 labelobj = zeros(1,0);
 labeltype = zeros(1,0);
 
@@ -127,7 +129,6 @@ v2 = mesh.shelf1.U(:,27)-mesh.shelf1.U(:,26);
 
 n = cross(v1,v2);n= n/norm(n);
 pl = [n;-n'*mesh.shelf1.U(:,25)];
-
 
 
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
@@ -144,13 +145,17 @@ for ii=lookups.right_shelf_bottles.U_idx,
 
     Utmp=T(1:3,:)*pextend(Ubottle);
 
-    triobj = [triobj,tribottle+size(Uobj,2)];
-    Uobj=[Uobj,Utmp];
+    mesh.right_shelf_bottles.tri = [mesh.right_shelf_bottles.tri,tribottle+size(mesh.right_shelf_bottles.U,2)];
+    mesh.right_shelf_bottles.U = [mesh.right_shelf_bottles.U,Utmp];
     labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
 end
 
 
 
+
+mesh.left_shelf_bottles = struct();
+mesh.left_shelf_bottles.U = zeros(3,0);
+mesh.left_shelf_bottles.tri = zeros(3,0);
 
 % Upper left shelf with bottles
 v1 = mesh.shelf3.U(:,26)-mesh.shelf3.U(:,25);
@@ -175,17 +180,21 @@ for ii=lookups.left_shelf_bottles.U_idx,
 
     Utmp=T(1:3,:)*pextend(Ubottle);
 
-    triobj = [triobj,tribottle+size(Uobj,2)];
-    Uobj=[Uobj,Utmp];
+    mesh.left_shelf_bottles.tri = [mesh.left_shelf_bottles.tri,tribottle+size(mesh.left_shelf_bottles.U,2)];
+    mesh.left_shelf_bottles.U = [mesh.left_shelf_bottles.U,Utmp];
     labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
 end
 
 
 
 % Merge mesh
-tricell = {mesh.shelf1.tri, mesh.shelf2.tri, mesh.shelf3.tri};
-Utricell = {mesh.shelf1.U, mesh.shelf2.U, mesh.shelf3.U};
-[tri, Utri] = merge_mesh(tricell, Utricell);
+[tri, Utri] = merge_mesh( ...
+    {mesh.shelf1.tri, mesh.shelf2.tri, mesh.shelf3.tri}, ...
+    {mesh.shelf1.U, mesh.shelf2.U, mesh.shelf3.U});
+
+[triobj, Uobj] = merge_mesh( ...
+    {mesh.right_shelf_bottles.tri, mesh.left_shelf_bottles.tri}, ...
+    {mesh.right_shelf_bottles.U, mesh.left_shelf_bottles.U});
 
 
 % THE FOLLOWING IS OLD
