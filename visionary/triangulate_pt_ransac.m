@@ -34,8 +34,10 @@ function [U, inliers] = triangulate_pt_ransac(xlist, Plist, iters, threshold)
         % Reproject the triangulated points in all other views 
         proj = zeros(3,N); 
         for k = 1:N
-            proj(:,k) = pflat(Plist{k}*U);
-            inliers(k) = (norm(xlist(:,k)-proj(:,k)) < threshold); 
+            U_proj = Plist{k}*U;
+            inFront = (U_proj(3) > 0);
+            proj(:,k) = pflat(U_proj);
+            inliers(k) = (norm(xlist(:,k)-proj(:,k)) < threshold) & inFront; 
         end
         
         if (nnz(inliers) > bestNumInliers)
