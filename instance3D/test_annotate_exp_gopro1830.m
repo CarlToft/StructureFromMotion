@@ -23,12 +23,22 @@ file='GOPR1830/';
 load result_anno_updated_path
 
 
+% Create data structure to determine the source of all points in U & u_uncalib
+lookups = struct();
+% Indices for all SFM points
+lookups.sfm = create_lookups(U, u_uncalib);
+
+
 
 
 % Add points for shelves and update reconstruction
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
 % [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
 load result1_shelves_and_updated_cameras
+lookups.shelves = struct('U_idx', {}, 'u_idx', {});
+lookups.shelves(1) = create_lookups(U, u_uncalib, [1,4,44,48], 6, 6+5);
+lookups.shelves(2) = create_lookups(U, u_uncalib, [1,4,44,48], 6, 5);
+lookups.shelves(3) = create_lookups(U, u_uncalib, [1,4,44,48], 5, 0);
 
 
 
@@ -37,48 +47,30 @@ load result1_shelves_and_updated_cameras
 % Bottles from right to left. 4 regular Coca-Cola, followed by 3 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
 load result2a_upper_right_bottles
+lookups.right_shelf_bottles = create_lookups(U, u_uncalib, [60,68,44,48], 7);
 
 
 % Add points for upper left shelf of bottles.
 % Bottles from right to left. 6 regular Coca-Cola, followed by 2 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[210,220,230,290]);
 load result2b_upper_left_bottles
+lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
 
 
 
+mesh = struct();
 
-
-%construct mesh
-nbrpoints_total = size(U,2);
-nbrpoints_Utri = nbrpoints_total-nbrpoints_sfm;
-Utri = zeros(3,0);
-tri = zeros(3,0);
-
+mesh.shelves = struct('tri', {}, 'U', {});
 %add bookshelf 1
-Utmp = U(1:3,nbrpoints_sfm+[1:6]);
-shelfindex = [1,22,26,27,25,21];
-[trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
-
-tri = [tri,trishelf+size(Utri,2)];
-Utri = [Utri,Ushelf];
-
+[mesh.shelves(1).tri, mesh.shelves(1).U] = annotate_addshelf(U(1:3, lookups.shelves(1).U_idx), [1,22,26,27,25,21]);
 
 %add bookshelf 2
-Utmp = U(1:3,nbrpoints_sfm+[7:12]);
-shelfindex = [22,2,1,26,25,7];
-[trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
-
-tri = [tri,trishelf+size(Utri,2)];
-Utri = [Utri,Ushelf];
+% mesh.shelves(2) = struct();
+[mesh.shelves(2).tri, mesh.shelves(2).U] = annotate_addshelf(U(1:3, lookups.shelves(2).U_idx), [22,2,1,26,25,7]);
 
 %add bookshelf 3
-Utmp = U(1:3,nbrpoints_sfm+[13:17]);
-shelfindex = [2,6,1,25,22];
-[trishelf, Ushelf] = annotate_addshelf(Utmp, shelfindex);
-
-tri = [tri,trishelf+size(Utri,2)];
-Utri = [Utri,Ushelf];
-
+% mesh.shelves(3) = struct();
+[mesh.shelves(3).tri, mesh.shelves(3).U] = annotate_addshelf(U(1:3, lookups.shelves(3).U_idx), [2,6,1,25,22]);
 
 
 % %blue berry covers
@@ -111,86 +103,54 @@ Utri = [Utri,Ushelf];
 
 
 % ADD OBJECTS
-%bottles
-
-nbrpoints_anno = nbrpoints_sfm+17;
-
-alpha = 0:0.4:2*pi;rr = 0.13;height=0.8;nn=length(alpha);
-Ubottle=[rr*cos(alpha),rr*cos(alpha),0;rr*sin(alpha),rr*sin(alpha),0;zeros(size(alpha)),height*ones(size(alpha)),1];
-tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
-             [2:nn,1],  [nn+2:2*nn,nn+1]  , nn+1:2*nn, ;...
-             nn+1:2*nn, [2:nn,1]       , [nn+2:2*nn,nn+1]];
-%figure(1);clf;trisurf(tribottle',Ubottle(1,:),Ubottle(2,:),Ubottle(3,:));axis equal;rotate3d on;
-
 %labels
-labelcnt=0;
+instance_cnt=0;
 
-%gravity vector
-
-Uobj = zeros(3,0);
-triobj = zeros(3,0);
-labelobj = zeros(1,0);
-labeltype = zeros(1,0);
 
 % Upper right shelf with bottles
-v1 = Utri(:,26)-Utri(:,25);
-v2 = Utri(:,27)-Utri(:,26);
-
-n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,25)];
-
-
+mesh.right_shelf_bottles = struct('tri', {}, 'U', {});
 
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
-labeltype = [labeltype,1,1,1,1,2,2,2];
-for ii=nbrpoints_anno+[1:7],
-    labelcnt = labelcnt+1;
-    ll = -n'*U(1:3,ii)-pl(4);
-    Uplane = U(1:3,ii)+ll*n;
+class_labels_tmp = [1,1,1,1,2,2,2];
 
-    sc = norm(Uplane-U(1:3,ii));
+plane = get_plane(mesh.shelves(1).U, 1);
 
-    R = [null(n'), n]; if det(R)<0,R=[R(:,2),R(:,1),R(:,3)];end
-    T = [sc*R,Uplane;[0,0,0,1]];
-
-    Utmp=T(1:3,:)*pextend(Ubottle);
-
-    triobj = [triobj,tribottle+size(Uobj,2)];
-    Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
+for j=1:length(lookups.right_shelf_bottles.U_idx),
+    instance_cnt=instance_cnt+1;
+    lid_position = U(1:3, lookups.right_shelf_bottles.U_idx(j));
+    [mesh.right_shelf_bottles(j).tri, mesh.right_shelf_bottles(j).U] = annotate_addbottle(plane, lid_position);
+    mesh.right_shelf_bottles(j).class_label = class_labels_tmp(j);
 end
 
 
 
 
 % Upper left shelf with bottles
-v1 = Utri(:,32*2+26)-Utri(:,32*2+25);
-v2 = Utri(:,32*2+27)-Utri(:,32*2+26);
-
-n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,32*2+25)];
+mesh.left_shelf_bottles = struct('tri', {}, 'U', {});
 
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
-labeltype = [labeltype,1,1,1,1,1,1,2,2];
-for ii=nbrpoints_anno+[8:15],
-    Upp = U(1:3,ii);
-    labelcnt=labelcnt+1;
-    labeltype(labelcnt) = 1; %cocacola pet 1.5 litre
-    ll = -n'*Upp-pl(4);
-    Uplane = Upp+ll*n;
+class_labels_tmp = [1,1,1,1,1,1,2,2];
 
-    sc = norm(Uplane-Upp);
+plane = get_plane(mesh.shelves(3).U, 1);
 
-    R = [null(n'), n]; if det(R)<0,R=[R(:,2),R(:,1),R(:,3)];end
-    T = [sc*R,Uplane;[0,0,0,1]];
-
-    Utmp=T(1:3,:)*pextend(Ubottle);
-
-    triobj = [triobj,tribottle+size(Uobj,2)];
-    Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
+for j=1:length(lookups.left_shelf_bottles.U_idx),
+    instance_cnt=instance_cnt+1;
+    lid_position = U(1:3, lookups.left_shelf_bottles.U_idx(j));
+    [mesh.left_shelf_bottles(j).tri, mesh.left_shelf_bottles(j).U] = annotate_addbottle(plane, lid_position);
+    mesh.left_shelf_bottles(j).class_label = class_labels_tmp(j);
 end
 
+
+
+% Merge mesh
+[tri, Utri] = merge_mesh(mesh.shelves);
+
+all_instances = [ ...
+    mesh.right_shelf_bottles, ...
+    mesh.left_shelf_bottles];
+
+[triobj, Uobj, instance_labels] = merge_mesh(all_instances);
+class_labels = [all_instances.class_label];
 
 
 % THE FOLLOWING IS OLD
@@ -223,29 +183,29 @@ Ucc = Usaft(:,ccindex);
 
 
 %plane of saft soppa
-v1 = Utri(:,32+26)-Utri(:,32+25);
-v2 = Utri(:,32+27)-Utri(:,32+26);
-v3 = Utri(:,32+27)-Utri(:,32+26);
-v4 = Utri(:,32+14)-Utri(:,32+12);
+v1 = mesh.shelves(2).U(:,26)-mesh.shelves(2).U(:,25);
+v2 = mesh.shelves(2).U(:,27)-mesh.shelves(2).U(:,26);
+v3 = mesh.shelves(2).U(:,27)-mesh.shelves(2).U(:,26);
+v4 = mesh.shelves(2).U(:,14)-mesh.shelves(2).U(:,12);
 
 n = cross(v1,v2);n= n/norm(n);
 n2 = cross(v3,v4);n2= n2/norm(n2);
 
 %n = n + 0.05*n2;n=n/norm(n);
-pl = [n;-n'*Utri(:,32+25)-0.0001];
+pl = [n;-n'*mesh.shelves(2).U(:,25)-0.0001];
 
 cc = 0;
 for ii=nbrpoints_anno+[16:30],
     Upp = U(1:3,ii);
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
     cc = cc +1;
     if cc==5,
         cc=1;
     end
     if cc<=8,
-        labeltype(labelcnt) = 5; %blackberry
+        class_labels(instance_cnt) = 5; %blackberry
     else
-        labeltype(labelcnt) = 4; %blueberry
+        class_labels(instance_cnt) = 4; %blueberry
     end
         
     ll = -n'*Upp-pl(4);
@@ -267,14 +227,14 @@ for ii=nbrpoints_anno+[16:30],
 
     triobj = [triobj,trisaft+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(trisaft,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(trisaft,2))];
 end
 
 
 
 %three packages in random position
-pl = [n;-n'*Utri(:,32+25)];
-labeltype = [labeltype,4,5,5];
+pl = [n;-n'*mesh.shelves(2).U(:,25)];
+class_labels = [class_labels,4,5,5];
 for ii=nbrpoints_anno+[31:2:36],
     Upp1 = U(1:3,ii);
     Upp2 = U(1:3,ii+1);
@@ -287,7 +247,7 @@ for ii=nbrpoints_anno+[31:2:36],
     end
     
     
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
         
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
@@ -319,18 +279,18 @@ for ii=nbrpoints_anno+[31:2:36],
 
     triobj = [triobj,trisaft+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(trisaft,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(trisaft,2))];
 end
 
 %three packages in random position
-pl = [n;-n'*Utri(:,32+1)-0.0001];
-labeltype = [labeltype,4,5,5];
+pl = [n;-n'*mesh.shelves(2).U(:,1)-0.0001];
+class_labels = [class_labels,4,5,5];
 for ii=nbrpoints_anno+[40:3:45],
     Upp1 = U(1:3,ii);
     Upp2 = U(1:3,ii+1);
     Upp = U(1:3,ii+2);
     
-    labelcnt=labelcnt+1;
+    instance_cnt=instance_cnt+1;
         
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
@@ -358,7 +318,7 @@ for ii=nbrpoints_anno+[40:3:45],
 
     triobj = [triobj,trisaft+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(trisaft,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(trisaft,2))];
 end
 
 
@@ -379,11 +339,11 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
 
 
 %plane of coke bottles
-v1 = Utri(:,2)-Utri(:,1);
-v2 = Utri(:,7)-Utri(:,2);
+v1 = mesh.shelves(1).U(:,2)-mesh.shelves(1).U(:,1);
+v2 = mesh.shelves(1).U(:,7)-mesh.shelves(1).U(:,2);
 
 n = cross(v1,v2);n= n/norm(n);
-pl = [n;-n'*Utri(:,1)];
+pl = [n;-n'*mesh.shelves(1).U(:,1)];
 
 
 Utop = U(1:3,nbrpoints_anno+[46:69]);
@@ -403,8 +363,8 @@ for ii=nbrpoints_anno+[46:69],
     Upp = Upp+ll*toppl(1:3);
     
     
-    labelcnt=labelcnt+1;
-    labeltype(labelcnt) = 3; %cocacola can 33 cl
+    instance_cnt=instance_cnt+1;
+    class_labels(instance_cnt) = 3; %cocacola can 33 cl
     ll = -n'*Upp-pl(4);
     Uplane = Upp+ll*n;
 
@@ -417,14 +377,14 @@ for ii=nbrpoints_anno+[46:69],
 
     triobj = [triobj,tribottle+size(Uobj,2)];
     Uobj=[Uobj,Utmp];
-    labelobj=[labelobj,labelcnt*ones(1,size(tribottle,2))];
+    instance_labels=[instance_labels,instance_cnt*ones(1,size(tribottle,2))];
 end
 
     
 
 
 
-figure(1);clf;trisurf(tri',Utri(1,:),Utri(2,:),Utri(3,:));axis equal;rotate3d on;hold on;
+figure(1);clf;trisurf(tri',mesh.shelves(1).U(1,:),mesh.shelves(1).U(2,:),mesh.shelves(1).U(3,:));axis equal;rotate3d on;hold on;
 trisurf(triobj',Uobj(1,:),Uobj(2,:),Uobj(3,:));
 
 
@@ -433,7 +393,7 @@ pause;
          
 
 for imindex = 1:48,imindex
-    annotate_plot(settings,P_uncalib,imindex, tri, Utri, triobj, Uobj, labelobj);
+    annotate_plot(settings,P_uncalib,imindex, tri, Utri, triobj, Uobj, instance_labels);
     pause
     close(imindex);
 end
