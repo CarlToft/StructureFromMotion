@@ -107,75 +107,37 @@ mesh.shelves = struct('tri', {}, 'U', {});
 instance_cnt=0;
 
 
-%bottles
-alpha = 0:0.4:2*pi;rr = 0.13;height=0.8;nn=length(alpha);
-Ubottle=[rr*cos(alpha),rr*cos(alpha),0;rr*sin(alpha),rr*sin(alpha),0;zeros(size(alpha)),height*ones(size(alpha)),1];
-tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
-             [2:nn,1],  [nn+2:2*nn,nn+1]  , nn+1:2*nn, ;...
-             nn+1:2*nn, [2:nn,1]       , [nn+2:2*nn,nn+1]];
-%figure(1);clf;trisurf(tribottle',Ubottle(1,:),Ubottle(2,:),Ubottle(3,:));axis equal;rotate3d on;
-
-
-
 % Upper right shelf with bottles
-
 mesh.right_shelf_bottles = struct('tri', {}, 'U', {});
 
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
-class_labels = [1,1,1,1,2,2,2];
+class_labels_tmp = [1,1,1,1,2,2,2];
 
-pl = get_plane(mesh.shelves(1).U, 1);
-n = pl(1:3);
-
+plane = get_plane(mesh.shelves(1).U, 1);
 
 for j=1:length(lookups.right_shelf_bottles.U_idx),
-    ii = lookups.right_shelf_bottles.U_idx(j);
-    instance_cnt = instance_cnt+1;
-    ll = -n'*U(1:3,ii)-pl(4);
-    Uplane = U(1:3,ii)+ll*n;
-
-    sc = norm(Uplane-U(1:3,ii));
-
-    R = [null(n'), n]; if det(R)<0,R=[R(:,2),R(:,1),R(:,3)];end
-    T = [sc*R,Uplane;[0,0,0,1]];
-
-    Utmp=T(1:3,:)*pextend(Ubottle);
-
-    mesh.right_shelf_bottles(j).tri = tribottle;
-    mesh.right_shelf_bottles(j).U = Utmp;
-    mesh.right_shelf_bottles(j).class_label = class_labels(j);
+    instance_cnt=instance_cnt+1;
+    lid_position = U(1:3, lookups.right_shelf_bottles.U_idx(j));
+    [mesh.right_shelf_bottles(j).tri, mesh.right_shelf_bottles(j).U] = annotate_addbottle(plane, lid_position);
+    mesh.right_shelf_bottles(j).class_label = class_labels_tmp(j);
 end
 
 
 
 
 % Upper left shelf with bottles
-
 mesh.left_shelf_bottles = struct('tri', {}, 'U', {});
 
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
-class_labels = [1,1,1,1,1,1,2,2];
+class_labels_tmp = [1,1,1,1,1,1,2,2];
 
-pl = get_plane(mesh.shelves(3).U, 1);
-n = pl(1:3);
+plane = get_plane(mesh.shelves(3).U, 1);
 
 for j=1:length(lookups.left_shelf_bottles.U_idx),
-    ii = lookups.left_shelf_bottles.U_idx(j);
-    Upp = U(1:3,ii);
     instance_cnt=instance_cnt+1;
-    ll = -n'*Upp-pl(4);
-    Uplane = Upp+ll*n;
-
-    sc = norm(Uplane-Upp);
-
-    R = [null(n'), n]; if det(R)<0,R=[R(:,2),R(:,1),R(:,3)];end
-    T = [sc*R,Uplane;[0,0,0,1]];
-
-    Utmp=T(1:3,:)*pextend(Ubottle);
-
-    mesh.left_shelf_bottles(j).tri = tribottle;
-    mesh.left_shelf_bottles(j).U = Utmp;
-    mesh.left_shelf_bottles(j).class_label = class_labels(j);
+    lid_position = U(1:3, lookups.left_shelf_bottles.U_idx(j));
+    [mesh.left_shelf_bottles(j).tri, mesh.left_shelf_bottles(j).U] = annotate_addbottle(plane, lid_position);
+    mesh.left_shelf_bottles(j).class_label = class_labels_tmp(j);
 end
 
 
