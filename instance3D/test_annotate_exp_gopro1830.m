@@ -120,11 +120,9 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
 
 % Upper right shelf with bottles
 
-mesh.right_shelf_bottles = struct();
-mesh.right_shelf_bottles.U = zeros(3,0);
-mesh.right_shelf_bottles.tri = zeros(3,0);
+mesh.right_shelf_bottles = struct('tri', {}, 'U', {});
 
-labels.right_shelf_bottles = struct()
+labels.right_shelf_bottles = struct();
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
 labels.right_shelf_bottles.class_labels = [1,1,1,1,2,2,2];
 labels.right_shelf_bottles.instance_labels = zeros(1,0);
@@ -133,7 +131,8 @@ pl = get_plane(mesh.shelves(1).U, 1);
 n = pl(1:3);
 
 
-for ii=lookups.right_shelf_bottles.U_idx,
+for j=1:length(lookups.right_shelf_bottles.U_idx),
+    ii = lookups.right_shelf_bottles.U_idx(j);
     instance_cnt = instance_cnt+1;
     ll = -n'*U(1:3,ii)-pl(4);
     Uplane = U(1:3,ii)+ll*n;
@@ -145,8 +144,8 @@ for ii=lookups.right_shelf_bottles.U_idx,
 
     Utmp=T(1:3,:)*pextend(Ubottle);
 
-    mesh.right_shelf_bottles.tri = [mesh.right_shelf_bottles.tri,tribottle+size(mesh.right_shelf_bottles.U,2)];
-    mesh.right_shelf_bottles.U = [mesh.right_shelf_bottles.U,Utmp];
+    mesh.right_shelf_bottles(j).tri = tribottle;
+    mesh.right_shelf_bottles(j).U = Utmp;
     labels.right_shelf_bottles.instance_labels = [labels.right_shelf_bottles.instance_labels,instance_cnt*ones(1,size(tribottle,2))];
 end
 
@@ -155,11 +154,9 @@ end
 
 % Upper left shelf with bottles
 
-mesh.left_shelf_bottles = struct();
-mesh.left_shelf_bottles.U = zeros(3,0);
-mesh.left_shelf_bottles.tri = zeros(3,0);
+mesh.left_shelf_bottles = struct('tri', {}, 'U', {});
 
-labels.left_shelf_bottles = struct()
+labels.left_shelf_bottles = struct();
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
 labels.left_shelf_bottles.class_labels = [1,1,1,1,1,1,2,2];
 labels.left_shelf_bottles.instance_labels = zeros(1,0);
@@ -167,7 +164,8 @@ labels.left_shelf_bottles.instance_labels = zeros(1,0);
 pl = get_plane(mesh.shelves(3).U, 1);
 n = pl(1:3);
 
-for ii=lookups.left_shelf_bottles.U_idx,
+for j=1:length(lookups.left_shelf_bottles.U_idx),
+    ii = lookups.left_shelf_bottles.U_idx(j);
     Upp = U(1:3,ii);
     instance_cnt=instance_cnt+1;
     ll = -n'*Upp-pl(4);
@@ -180,8 +178,8 @@ for ii=lookups.left_shelf_bottles.U_idx,
 
     Utmp=T(1:3,:)*pextend(Ubottle);
 
-    mesh.left_shelf_bottles.tri = [mesh.left_shelf_bottles.tri,tribottle+size(mesh.left_shelf_bottles.U,2)];
-    mesh.left_shelf_bottles.U = [mesh.left_shelf_bottles.U,Utmp];
+    mesh.left_shelf_bottles(j).tri = tribottle;
+    mesh.left_shelf_bottles(j).U = Utmp;
     labels.left_shelf_bottles.instance_labels = [labels.left_shelf_bottles.instance_labels,instance_cnt*ones(1,size(tribottle,2))];
 end
 
