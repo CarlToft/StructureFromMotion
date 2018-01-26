@@ -59,7 +59,6 @@ lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
 
 
 mesh = struct();
-labels = struct();
 
 mesh.shelves = struct('tri', {}, 'U', {});
 %add bookshelf 1
@@ -122,10 +121,8 @@ tribottle = [1:nn,      nn+1:2*nn, 2*nn+1*ones(1,nn) ; ...
 
 mesh.right_shelf_bottles = struct('tri', {}, 'U', {});
 
-labels.right_shelf_bottles = struct();
 % 4 Regular Coca-Cola bottles, 3 Coca-Cola Zero bottles
-labels.right_shelf_bottles.class_labels = [1,1,1,1,2,2,2];
-labels.right_shelf_bottles.instance_labels = zeros(1,0);
+class_labels = [1,1,1,1,2,2,2];
 
 pl = get_plane(mesh.shelves(1).U, 1);
 n = pl(1:3);
@@ -146,7 +143,7 @@ for j=1:length(lookups.right_shelf_bottles.U_idx),
 
     mesh.right_shelf_bottles(j).tri = tribottle;
     mesh.right_shelf_bottles(j).U = Utmp;
-    labels.right_shelf_bottles.instance_labels = [labels.right_shelf_bottles.instance_labels,instance_cnt*ones(1,size(tribottle,2))];
+    mesh.right_shelf_bottles(j).class_label = class_labels(j);
 end
 
 
@@ -156,10 +153,8 @@ end
 
 mesh.left_shelf_bottles = struct('tri', {}, 'U', {});
 
-labels.left_shelf_bottles = struct();
 % 6 Regular Coca-Cola bottles, 2 Coca-Cola Zero bottles
-labels.left_shelf_bottles.class_labels = [1,1,1,1,1,1,2,2];
-labels.left_shelf_bottles.instance_labels = zeros(1,0);
+class_labels = [1,1,1,1,1,1,2,2];
 
 pl = get_plane(mesh.shelves(3).U, 1);
 n = pl(1:3);
@@ -180,7 +175,7 @@ for j=1:length(lookups.left_shelf_bottles.U_idx),
 
     mesh.left_shelf_bottles(j).tri = tribottle;
     mesh.left_shelf_bottles(j).U = Utmp;
-    labels.left_shelf_bottles.instance_labels = [labels.left_shelf_bottles.instance_labels,instance_cnt*ones(1,size(tribottle,2))];
+    mesh.left_shelf_bottles(j).class_label = class_labels(j);
 end
 
 
@@ -188,17 +183,13 @@ end
 % Merge mesh
 [tri, Utri] = merge_mesh(mesh.shelves);
 
-[triobj, Uobj] = merge_mesh([ ...
+all_instances = [ ...
     mesh.right_shelf_bottles, ...
-    mesh.left_shelf_bottles]);
+    mesh.left_shelf_bottles];
 
-% Merge labels
-instance_labels = [ ...
-    labels.right_shelf_bottles.instance_labels, ...
-    labels.left_shelf_bottles.instance_labels];
-class_labels = [ ...
-    labels.right_shelf_bottles.class_labels, ...
-    labels.left_shelf_bottles.class_labels];
+[triobj, Uobj, instance_labels] = merge_mesh(all_instances);
+class_labels = [all_instances.class_label];
+
 
 % THE FOLLOWING IS OLD
 STOP_HERE
