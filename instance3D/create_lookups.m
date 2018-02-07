@@ -1,34 +1,19 @@
-function lookups = create_lookups(U, u, cameras, nbr_pts_to_add, offset_from_end)
+function lookups = create_lookups(U, u, nbr_pts_to_add, start_idx)
     nbr_3d_pts = size(U, 2);
-    nbr_cameras = size(u.points, 2);
+    nbr_views = size(u.points, 2);
 
     if nargin < 3
-        % By default, create lookups for all cameras.
-        cameras = 1:nbr_cameras;
+        % By default, create lookups for all the points.
+        nbr_pts_to_add = nbr_3d_pts;
     end
     if nargin < 4
-        % By default, create lookups for all the points.
-        % Indicated with -1.
-        nbr_pts_to_add = -1;
-    end
-    if nargin < 5
-        % Optional number of trailing points to ignore.
-        offset_from_end = 0;
+        % By default use the trailing points, i.e. start "nbr_pts_to_add" from the end.
+        start_idx = nbr_3d_pts - nbr_pts_to_add + 1;
     end
 
     lookups = struct();
-    if nbr_pts_to_add == -1
-        lookups.U_idx = 1 : nbr_3d_pts;
-    else
-        lookups.U_idx = nbr_3d_pts-offset_from_end-nbr_pts_to_add+1 : nbr_3d_pts-offset_from_end;
-    end
-    lookups.u_idx = cell(1, nbr_cameras);
-    for j = cameras
-        nbr_2d_pts = size(u.points{j}, 2);
-        if nbr_pts_to_add == -1
-            lookups.u_idx{j} = 1 : nbr_2d_pts;
-        else
-            lookups.u_idx{j} = nbr_2d_pts-offset_from_end-nbr_pts_to_add+1 : nbr_2d_pts-offset_from_end;
-        end
+    lookups.U_idx = [];
+    for j = start_idx : start_idx+nbr_pts_to_add-1
+        lookups.U_idx = [lookups.U_idx, j];
     end
 end

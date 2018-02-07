@@ -35,10 +35,11 @@ lookups.sfm = create_lookups(U, u_uncalib);
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[1,4,44,48]);
 % [U,P_uncalib,lambda] = modbundle_sparse(U,P_uncalib,u_uncalib,10,10);
 load result1_shelves_and_updated_cameras
-lookups.shelves = struct('U_idx', {}, 'u_idx', {});
-lookups.shelves(1) = create_lookups(U, u_uncalib, [1,4,44,48], 6, 6+5);
-lookups.shelves(2) = create_lookups(U, u_uncalib, [1,4,44,48], 6, 5);
-lookups.shelves(3) = create_lookups(U, u_uncalib, [1,4,44,48], 5, 0);
+lookups.shelves = struct('U_idx', {});
+idx = size(U,2)+1 - (6+6+5);
+lookups.shelves(1) = create_lookups(U, u_uncalib, 6, idx); idx = idx + 6;
+lookups.shelves(2) = create_lookups(U, u_uncalib, 6, idx); idx = idx + 6;
+lookups.shelves(3) = create_lookups(U, u_uncalib, 5, idx);
 
 
 
@@ -47,14 +48,14 @@ lookups.shelves(3) = create_lookups(U, u_uncalib, [1,4,44,48], 5, 0);
 % Bottles from right to left. 4 regular Coca-Cola, followed by 3 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
 load result2a_upper_right_bottles
-lookups.right_shelf_bottles = create_lookups(U, u_uncalib, [60,68,44,48], 7);
+lookups.right_shelf_bottles = create_lookups(U, u_uncalib, 7);
 
 
 % Add points for upper left shelf of bottles.
 % Bottles from right to left. 6 regular Coca-Cola, followed by 2 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[210,220,230,290]);
 load result2b_upper_left_bottles
-lookups.left_shelf_bottles = create_lookups(U, u_uncalib, [210,220,230,290], 8);
+lookups.left_shelf_bottles = create_lookups(U, u_uncalib, 8);
 
 
 
