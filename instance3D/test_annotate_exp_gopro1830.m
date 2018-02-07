@@ -48,14 +48,24 @@ lookups.shelves(3) = create_lookups(U, u_uncalib, 5, idx);
 % Bottles from right to left. 4 regular Coca-Cola, followed by 3 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[60,68,44,48]);
 load result2a_upper_right_bottles
-lookups.right_shelf_bottles = create_lookups(U, u_uncalib, 7);
+lookups.right_shelf_bottles = struct('U_idx', {});
+nbr_instances = 7;
+for j = 1:nbr_instances
+    idx = size(U,2)-nbr_instances + j;
+    lookups.right_shelf_bottles(j) = create_lookups(U, u_uncalib, 1, idx);
+end
 
 
 % Add points for upper left shelf of bottles.
 % Bottles from right to left. 6 regular Coca-Cola, followed by 2 Coca-Cola Zero.
 % [u_uncalib,U]=add_1point(settings,P_uncalib,U,u_uncalib,[210,220,230,290]);
 load result2b_upper_left_bottles
-lookups.left_shelf_bottles = create_lookups(U, u_uncalib, 8);
+lookups.left_shelf_bottles = struct('U_idx', {});
+nbr_instances = 8;
+for j = 1:nbr_instances
+    idx = size(U,2)-nbr_instances + j;
+    lookups.left_shelf_bottles(j) = create_lookups(U, u_uncalib, 1, idx);
+end
 
 
 
@@ -116,9 +126,9 @@ class_labels_tmp = [1,1,1,1,2,2,2];
 
 plane = get_plane(mesh.shelves(1).U, 1);
 
-for j=1:length(lookups.right_shelf_bottles.U_idx),
+for j=1:length(lookups.right_shelf_bottles),
     instance_cnt=instance_cnt+1;
-    lid_position = U(1:3, lookups.right_shelf_bottles.U_idx(j));
+    lid_position = U(1:3, lookups.right_shelf_bottles(j).U_idx);
     [mesh.right_shelf_bottles(j).tri, mesh.right_shelf_bottles(j).U] = annotate_addbottle(plane, lid_position);
     mesh.right_shelf_bottles(j).class_label = class_labels_tmp(j);
 end
@@ -134,9 +144,9 @@ class_labels_tmp = [1,1,1,1,1,1,2,2];
 
 plane = get_plane(mesh.shelves(3).U, 1);
 
-for j=1:length(lookups.left_shelf_bottles.U_idx),
+for j=1:length(lookups.left_shelf_bottles),
     instance_cnt=instance_cnt+1;
-    lid_position = U(1:3, lookups.left_shelf_bottles.U_idx(j));
+    lid_position = U(1:3, lookups.left_shelf_bottles(j).U_idx);
     [mesh.left_shelf_bottles(j).tri, mesh.left_shelf_bottles(j).U] = annotate_addbottle(plane, lid_position);
     mesh.left_shelf_bottles(j).class_label = class_labels_tmp(j);
 end
