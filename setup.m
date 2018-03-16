@@ -15,7 +15,8 @@ else
 end
 
 % Check that the path is absolute
-is_relative = isempty(regexp(lib_folder(1),'[/\\]', 'once'));
+is_relative = isempty(regexp(lib_folder(1),'[/\\]', 'once')) && ...
+              isempty(regexp(lib_folder(2),':', 'once'));
 if is_relative 
     lib_folder = fullfile(pwd, lib_folder);
     disp(['Correcting relative path to: ' lib_folder]);
@@ -24,7 +25,10 @@ end
 % Include local folders
 addpath(fullfile(pwd, 'visionary'));
 addpath(fullfile(pwd, 'SfM_lib'));
-mex(fullfile(pwd, 'visionary','calibrated_fivepoint_helper.c'));
+
+mex('-outdir',...
+    fullfile(pwd, 'visionary'),...
+    fullfile(pwd, 'visionary','calibrated_fivepoint_helper.c'));
 
 % Include calibration toolbox folder
 addpath(fullfile(lib_folder,'TOOLBOX_calib'));
