@@ -1,0 +1,3 @@
+[submodule "visionary"]
+	path = visionary
+	url = git@github.com:CarlToft/visionary.git
