@@ -6,8 +6,8 @@ visviews = settings.visviews;
 pixtol2 = settings.pixtol2;
 KK = settings.KK;
 
-load(strcat(save_path,'str_mot.mat'));
-load(strcat(save_path,'impoints4.mat'));
+load(fullfile(save_path,'str_mot.mat'));
+load(fullfile(save_path,'impoints4.mat'));
 
 vis = zeros(1,u.pointnr);
 for i=1:length(u.points)
@@ -44,7 +44,9 @@ for i = 1:length(P);
 end
 
 for i = 1:100;
-    i
+%     if settings.debug_match
+%         fprintf('%s','+');
+%     end
     %randomly select two cameras
     camnr1 = ceil(rand(size(nrcams)).*nrcams);
     camnr2 = ceil(rand(size(nrcams)).*(nrcams-1));
@@ -56,15 +58,15 @@ for i = 1:100;
     vis = false(1,u.pointnr);
     
     for j = 1:length(P);
-        cumnrcams(u.index{j}) = cumnrcams(u.index{j}) + 1; 
+        cumnrcams(u.index{j}) = cumnrcams(u.index{j}) + 1;
         vis(u.index{j}) = true;
-        cams1(camnr1 == cumnrcams & vis) = j;        
-        cams2(camnr2 == cumnrcams & vis) = j;        
+        cams1(camnr1 == cumnrcams & vis) = j;
+        cams2(camnr2 == cumnrcams & vis) = j;
         vis(u.index{j}) = false;
-    end    
+    end
     %Triangulate
     U = intsec2views_midpoint_mult_cam(P,u,cams1,cams2);
-        
+    
     p = NaN(3,u.pointnr);
     inliers = zeros(1,u.pointnr);
     vis = false(1,u.pointnr);
@@ -87,7 +89,10 @@ end
 imseq = cell(1,2);
 for i = 1:length(best_cam1);
     if mod(i,100) == 0
-        i
+        %i
+        if settings.debug_match
+            fprintf('%s','*');
+        end
     end
     P1 = P{best_cam1(i)};
     P2 = P{best_cam2(i)};
@@ -100,6 +105,10 @@ for i = 1:length(best_cam1);
     
     best_U(:,i) = intsec2views(P1,P2,p1(:,i),p2(:,i));
 end
+if settings.debug_match
+    fprintf('%s\n','=');
+end
+%
 p = NaN(3,u.pointnr);
 maxinliers = zeros(1,u.pointnr);
 vis = false(1,u.pointnr);
@@ -151,7 +160,7 @@ for i = 1:length(u.points)
         u.sift{i} = ppsift(:,isfinite(pp(1,:)));
     end
     u.index{i} = find(isfinite(pp(1,:)));
-    u.points{i} = pp(:,isfinite(pp(1,:)));    
+    u.points{i} = pp(:,isfinite(pp(1,:)));
 end
 
 %Bundle
@@ -165,7 +174,7 @@ end
 %    u_uncalib.points{i} = pflat(KK*u.points{i});
 %    u_uncalib.sift{i} = u.sift{i};
 %end
-save(strcat(save_path,'str_mot2.mat'), 'U', 'P', 'u', 'imnames');
+save(fullfile(save_path,'str_mot2.mat'), 'U', 'P', 'u', 'imnames');
 
 function y = pflat(x)
 y = x./repmat(x(end,:),[size(x,1) 1]);

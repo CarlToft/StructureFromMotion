@@ -74,6 +74,7 @@ C = [sparse(size(a,2),1); sparse(2*size(a,1),1); ones(2*size(a,1),1)];
 par = msklpopt(C,A,[],buc,[],[],[],'param');
 par.param.MSK_IPAR_INTPNT_BASIS = 'MSK_BI_NEVER'; %Turn off simplex solver
 par.param.MSK_IPAR_INTPNT_MAX_ITERATIONS = 3000; %increase max interations
+par.param.MSK_IPAR_LOG = 0; %increase max interations
 [m,n] = size(a);
 clear A1 A2 B1 B2 a a0 b b0 c c0;
 result = msklpopt(C,A,[],buc,[],[],par.param,'minimize');

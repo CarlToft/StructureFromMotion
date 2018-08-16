@@ -1,7 +1,11 @@
+function reconstruct_scene(datafolder)
+
+thisfolder = pwd;
+
 %Read settings
-cd corner/
-settings = reconstr_setup_corner;
-cd ..
+cd(datafolder)
+settings = reconstr_setup;
+cd(thisfolder)
 
 %Perform pairwise matching for all pairs, (unless camera_graph is
 %specified)
@@ -37,6 +41,8 @@ triang_outl_reconst(settings);
 
 %Remove points that are uncertain in the depth direction.
 [U,P_uncalib,u_uncalib] = remove_uncertin_points(settings); 
+save(fullfile(settings.save_path,'str_mot3.mat'), 'U', 'P_uncalib', 'u_uncalib');
+save(fullfile(settings.save_path,'settings3.mat'), 'settings');
 
 %Plot result
 plot_result(settings,P_uncalib,U,u_uncalib);

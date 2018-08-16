@@ -22,7 +22,9 @@ function [image, descriptors, locs] = mod_sift(image,settings)
 %image = imread(imageFile);
 
 fold = pwd;
-cd(settings.SIFT_path)
+[sift_folder , ~, ~] = fileparts(which('sift'));
+cd(sift_folder) %Find folder with sift.m, Lowe's SIFT folder needs to be added to path.
+
 % If you have the Image Processing Toolbox, you can uncomment the following
 %   lines to allow input of color images, which will be converted to grayscale.
  %if isrgb(image)

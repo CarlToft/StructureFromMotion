@@ -33,16 +33,16 @@ for i = 1:length(u.points);
     P{i} = inv(KKK)*P{i};
 end
 
-fprintf('Iter:\t Error:\t lambda:\n');
+%fprintf('Iter:\t Error:\t lambda:\n'); % KALLE
 res = compute_res(P,U,u);                 
-fprintf('%d\t%f\t%f',0,res,lambda);
+%fprintf('%d\t%f\t%f',0,res,lambda); % KALLE
 for i = 1:iter
     [A,B] = setup_lin_system(P,U,u);  
     res = compute_res(P,U,u);
     if ~schur
         C = (A'*A+lambda*speye(size(A,2),size(A,2)));
         c = A'*B;
-        fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.');
+        %fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.'); % KALLE
         d = -C\c;
     else
         %%%% Eliminera punkter %%%%%%%%%%
@@ -59,12 +59,12 @@ for i = 1:iter
         slask = invUU*slask;
         slask2 = AP'*AU;
         c = slask2*slask - AP'*B;
-        fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.');
+        %fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.'); % KALLE
         dR = C\c;
         dU = -invUU*(AU'*(AP*dR+B));
         d = [dU; dR];
     end    
-    fprintf('\tDone.\n');
+    %fprintf('\tDone.\n'); % KALLE
     [Pnew,Unew] = update_var(d,P,U);
     resnew = compute_res(Pnew,Unew,u);
     while resnew > res
@@ -72,7 +72,7 @@ for i = 1:iter
         if ~schur
             C = (A'*A+lambda*speye(size(A,2),size(A,2)));
             c = A'*B;
-            fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.');
+            %fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.'); % KALLE
             d = -C\c;
         else
             %%%% Eliminera punkter %%%%%%%%%%
@@ -89,7 +89,7 @@ for i = 1:iter
             slask = invUU*slask;
             slask2 = AP'*AU;
             c = slask2*slask - AP'*B;
-            fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.');
+            %fprintf('\t\t\t\t\t\t\tSolving mod-Newton system.'); % KALLE 
             dR = C\c;
             dU = -invUU*(AU'*(AP*dR+B));
             d = [dU; dR];
@@ -102,9 +102,9 @@ for i = 1:iter
     end
     U = Unew;
     P = Pnew;
-    fprintf('%d\t%f\t%f',i,resnew,lambda);
+    %fprintf('%d\t%f\t%f',i,resnew,lambda); % KALLE
 end
-fprintf('\n');
+% fprintf('\n'); % KALLE
 
 for i = 1:length(P);
     P{i} = KK{i}*P{i};
@@ -272,7 +272,7 @@ data = [];
 resnum = 0;
 B = [];
 %fprintf('\tSetting up system, camera: ');
-fprintf('\tSetting up system. ');
+%fprintf('\tSetting up system. ');
 %Allokera hela vektorn först två residualer för varje bild punkt
 resnr = 0;
 for i = 1:length(P);
@@ -527,7 +527,7 @@ A = sparse(row,col,data);
 %och första koordinaten i första punkten konstant
 A = A(:,[1:3*numpts 3*numpts+7:end]);
 A = A(:,[2:end]);
-fprintf('Done\n');
+%fprintf('Done\n'); %KALLE
 
 
 

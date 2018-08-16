@@ -7,7 +7,7 @@ camera_graph = settings.camera_graph;
 
 
 
-load(strcat(save_path,'impoints.mat'));
+load(fullfile(save_path,'impoints.mat'));
 
 %beräkna alla parvisa geometrier
 
@@ -16,30 +16,34 @@ for i = 1:length(imnames);
     for j = i+1:length(imnames);
         
         if isempty(camera_graph) || camera_graph(i,j) == 1,
-        
-        
-            [i j length(imnames)]
+            
+            
+            %[i j length(imnames)]
             p1 = NaN*ones(2,impoints.pointnr);
             p2 = NaN*ones(2,impoints.pointnr);
             p1(:,impoints.index{i}) = impoints.points{i};
             p2(:,impoints.index{j}) = impoints.points{j};
-        
+            
             vis = isfinite(p1(1,:)) & isfinite(p2(1,:));
-        
+            
             fc = KK([1 5]);
             cc = KK(1:2,3);
             alpha_c = KK(1,2)/fc(1);
             pp1 = pextend(normalize(p1([1,2],vis),fc,cc,kc,alpha_c));
             pp2 = pextend(normalize(p2([1,2],vis),fc,cc,kc,alpha_c));
-        
-%        pp1 = pflat(inv(KK)*pextend(p1(:,vis)));
-%        pp2 = pflat(inv(KK)*pextend(p2(:,vis)));
-        
+            
+            %        pp1 = pflat(inv(KK)*pextend(p1(:,vis)));
+            %        pp2 = pflat(inv(KK)*pextend(p2(:,vis)));
+            
             if sum(vis) > settings.mininlnr,
                 %5-punkt RANSAC
                 [maxinliers,Pmax] = RANSAC_Essential(pp2,pp1,RANSAC_pixtol/KK(1,1));
                 if ~isempty(Pmax);
-                    sum(maxinliers)
+                    if settings.debug_match
+                        fprintf('FivePointRansac: (%3d,%3d) of %3d. Inliers %5d of %5d.\n',i,j,length(imnames),sum(maxinliers),size(pp2,2));
+                    end
+                    %[i j length(imnames)]
+                    %sum(maxinliers)
                     vis = find(vis);
                     pairwise_geom{i,j}.P = Pmax;
                     pairwise_geom{i,j}.inliers = vis(maxinliers);
@@ -49,10 +53,12 @@ for i = 1:length(imnames);
     end
 end
 
-save(strcat(save_path,'pairwise_geom.mat'),'pairwise_geom');
+save(fullfile(save_path,'pairwise_geom.mat'),'pairwise_geom');
+
+%keyboard;
 
 if 0
-    load(strcat(save_path,'pairwise_geom.mat'));
+    load(fullfile(save_path,'pairwise_geom.mat'));
     
     i = 167;
     j = 168;
@@ -80,7 +86,7 @@ if 0
         plot(imagedata([],KK*getcameras(m,2)*getpoints(s)),'numberedro');
     else
         disp('Empty!');
-    end    
+    end
 end
 
 function y = pflat(x)

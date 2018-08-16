@@ -2,7 +2,6 @@ function pairwise_matching(settings, seq)
 imnames = settings.imnames;
 img_path = settings.img_path;
 scale = settings.scale;
-SIFT_path = settings.SIFT_path;
 save_path = settings.save_path;
 KK = settings.KK;
 kc = settings.kc;
@@ -12,7 +11,11 @@ if nargin<2,
     seq = 1:length(imnames);
 end
 imnames = imnames(seq);
-camera_graph = settings.camera_graph(seq,seq);
+if ~isempty(settings.camera_graph)
+    camera_graph = settings.camera_graph(seq,seq);
+else
+    camera_graph = [];
+end
 
 if ~isempty(settings.expectedEpipole),
     epipole = KK*pextend(apply_distortion(settings.expectedEpipole,kc));
@@ -108,7 +111,7 @@ for i = 1:length(seq);
      for j = i+1:length(seq);
         if ~(isempty(camera_graph)); %If there is a camera graph only use those pairs.
             if camera_graph(i,j) == 1
-                [i j length(seq)]
+                %[i j length(seq)]
                 
                 tmp2 = normr(double(SIFT{j}.desc))';
                 [index,dist] = vl_kdtreequery(kdtree,tmp1,tmp2,'MAXCOMPARISONS',50,'NUMNEIGHBORS',2);
@@ -133,8 +136,9 @@ for i = 1:length(seq);
 %                end
                 
                 matches(tmp) = index(1,tmp);
-                fprintf('Found %d mathches\n',sum(matches ~= 0));
-                
+                if settings.debug_match
+                    fprintf('Pairwise (%3d,%3d) of %3d. Found %4d matches\n',i,j,length(seq),sum(matches ~= 0));
+                end
                 ind2 = find(matches ~= 0);
                 ind1 = matches(ind2);
                 
@@ -150,7 +154,7 @@ for i = 1:length(seq);
                 pairwiseEst{i,j}.ind2 = [];
             end
         else %No camera graph. Match all pairs.
-            [i j length(seq)]
+            %[i j length(seq)]
             
             
             tmp2 = normr(double(SIFT{j}.desc))';
@@ -175,7 +179,9 @@ for i = 1:length(seq);
 %            end
                
             matches(tmp) = index(1,tmp);
-            fprintf('Found %d mathches\n',sum(matches ~= 0));
+                if settings.debug_match
+                    fprintf('Pairwise (%3d,%3d) of %3d. Found %4d matches\n',i,j,length(seq),sum(matches ~= 0));
+                end
             
             
             
@@ -211,7 +217,7 @@ if settings.storesift == 0,
     end
 end
 
-save(strcat(save_path,'pairwise_matchings.mat'), 'SIFT', 'pairwiseEst', 'imnames');
+save(fullfile(save_path,'pairwise_matchings.mat'), 'SIFT', 'pairwiseEst', 'imnames');
 
 if 0 %Debug code
     i = 1;
